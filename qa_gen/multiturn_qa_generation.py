@@ -8,6 +8,11 @@ from typing import Any, Sequence
 
 import torch
 from transformers import AutoModelForMultimodalLM, AutoProcessor
+try:
+    from tqdm.auto import tqdm
+except ImportError:  # pragma: no cover - keeps the script usable without tqdm
+    def tqdm(iterable, **kwargs):
+        return iterable
 
 try:
     from .utils import (
@@ -64,7 +69,7 @@ def build_prompt_items(records: Sequence[dict[str, Any]], template: str, process
 def generate_batches(model: Any, processor: Any, device: torch.device, batches: Sequence[Sequence[PromptItem]], max_new_tokens: int, sample: bool = False) -> dict[int, str]:
     """Generate one output per prompt batch; no parsing or file I/O occurs here."""
     outputs: dict[int, str] = {}
-    for batch in batches:
+    for batch in tqdm(batches, desc="QA generation", unit="batch"):
         messages = [[{"role": "user", "content": item.prompt}] for item in batch]
         inputs = processor.apply_chat_template(
             messages, tokenize=True, add_generation_prompt=True, enable_thinking=False,
@@ -177,7 +182,7 @@ def run(args: argparse.Namespace) -> Path:
     raw_outputs = generate_batches(model, processor, device, batches, args.max_new_tokens)
     accepted: list[dict[str, Any]] = []
     rejected: list[dict[str, Any]] = []
-    for item in items:
+    for item in tqdm(items, desc="Validating QA", unit="record"):
         raw = raw_outputs[item.index]; parsed, parse_error = parse_json_object(raw)
         errors = [parse_error] if parse_error else validate_dialogue(parsed, item.record)
         if errors:

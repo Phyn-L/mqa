@@ -26,7 +26,8 @@ export PYTHONUNBUFFERED=1
 run_python() { conda run -n shine python "$@"; }
 
 run_dataset() {
-  local dataset="$1" input_path="$2" out_dir="$OUTPUT_ROOT/$dataset"
+  local dataset="$1" input_path="$2"
+  local out_dir="$OUTPUT_ROOT/$dataset"
   local log_path="$out_dir/pipeline.log"
   mkdir -p "$out_dir"
   exec > >(tee -a "$log_path") 2>&1

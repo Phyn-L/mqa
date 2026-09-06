@@ -1,0 +1,852 @@
+[2026-09-07T01:44:59+08:00] start dataset=squad input=aggregated/squad/train.jsonl
+[2026-09-07T01:44:59+08:00] model=/home/lz/hf_cache/hub/models--Qwen--Qwen3.5-9B/snapshots/c202236235762e1c871ad0ccb60c8ee5ba337b9a gpus=0,1,2,3 max_samples=all
+[2026-09-07T01:44:59+08:00] fact extraction
+
+Loading weights:   0%|          | 0/760 [00:00<?, ?it/s]
+Loading weights:   0%|          | 1/760 [00:00<02:35,  4.88it/s]
+Loading weights:   6%|▌         | 47/760 [00:00<00:03, 191.26it/s]
+Loading weights:  10%|▉         | 75/760 [00:00<00:03, 172.08it/s]
+Loading weights:  13%|█▎        | 97/760 [00:00<00:04, 135.22it/s]
+Loading weights:  15%|█▌        | 114/760 [00:00<00:04, 131.53it/s]
+Loading weights:  17%|█▋        | 130/760 [00:00<00:04, 128.92it/s]
+Loading weights:  19%|█▉        | 145/760 [00:01<00:04, 125.89it/s]
+Loading weights:  21%|██        | 159/760 [00:01<00:05, 106.40it/s]
+Loading weights:  23%|██▎       | 173/760 [00:01<00:05, 110.26it/s]
+Loading weights:  25%|██▍       | 187/760 [00:01<00:05, 112.17it/s]
+Loading weights:  26%|██▋       | 200/760 [00:01<00:05, 111.02it/s]
+Loading weights:  28%|██▊       | 212/760 [00:01<00:05, 107.12it/s]
+Loading weights:  30%|██▉       | 226/760 [00:01<00:04, 112.24it/s]
+Loading weights:  32%|███▏      | 240/760 [00:02<00:04, 114.88it/s]
+Loading weights:  33%|███▎      | 254/760 [00:02<00:04, 115.14it/s]
+Loading weights:  35%|███▌      | 266/760 [00:02<00:04, 104.95it/s]
+Loading weights:  37%|███▋      | 280/760 [00:02<00:04, 107.73it/s]
+Loading weights:  39%|███▊      | 294/760 [00:02<00:04, 108.40it/s]
+Loading weights:  41%|████      | 308/760 [00:02<00:04, 108.95it/s]
+Loading weights:  42%|████▏     | 319/760 [00:02<00:04, 103.87it/s]
+Loading weights:  44%|████▍     | 333/760 [00:02<00:03, 111.25it/s]
+Loading weights:  46%|████▌     | 346/760 [00:02<00:03, 116.03it/s]
+Loading weights:  47%|████▋     | 359/760 [00:03<00:03, 119.48it/s]
+Loading weights:  49%|████▉     | 372/760 [00:03<00:03, 100.26it/s]
+Loading weights:  51%|█████     | 385/760 [00:03<00:03, 107.35it/s]
+Loading weights:  52%|█████▎    | 399/760 [00:03<00:03, 108.18it/s]
+Loading weights:  54%|█████▍    | 413/760 [00:03<00:03, 108.69it/s]
+Loading weights:  56%|█████▌    | 425/760 [00:03<00:03, 99.36it/s] 
+Loading weights:  73%|███████▎  | 557/760 [00:03<00:00, 398.81it/s]
+Loading weights:  89%|████████▉ | 676/760 [00:03<00:00, 602.95it/s]
+Loading weights: 100%|██████████| 760/760 [00:04<00:00, 187.85it/s]
+Traceback (most recent call last):
+  File "/data/lz/mqa/qa_gen/fact_extraction.py", line 411, in <module>
+    run(parse_args())
+  File "/data/lz/mqa/qa_gen/fact_extraction.py", line 302, in run
+    outputs = generate_batches(
+              ^^^^^^^^^^^^^^^^^
+  File "/data/lz/mqa/qa_gen/fact_extraction.py", line 192, in generate_batches
+    outputs = model.generate(
+              ^^^^^^^^^^^^^^^
+  File "/home/lz/miniconda3/envs/shine/lib/python3.12/site-packages/torch/utils/_contextlib.py", line 116, in decorate_context
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lz/miniconda3/envs/shine/lib/python3.12/site-packages/transformers/generation/utils.py", line 2668, in generate
+    result = decoding_method(
+             ^^^^^^^^^^^^^^^^
+  File "/home/lz/miniconda3/envs/shine/lib/python3.12/site-packages/transformers/generation/utils.py", line 2868, in _sample
+    outputs = self._prefill(
+              ^^^^^^^^^^^^^^
+  File "/home/lz/miniconda3/envs/shine/lib/python3.12/site-packages/transformers/generation/utils.py", line 3948, in _prefill
+    return self(**model_inputs, return_dict=True)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lz/miniconda3/envs/shine/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1736, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lz/miniconda3/envs/shine/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1747, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lz/miniconda3/envs/shine/lib/python3.12/site-packages/accelerate/hooks.py", line 192, in new_forward
+    output = module._old_forward(*args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lz/miniconda3/envs/shine/lib/python3.12/site-packages/transformers/utils/generic.py", line 939, in wrapper
+    output = func(self, *args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lz/miniconda3/envs/shine/lib/python3.12/site-packages/transformers/models/qwen3_5/modeling_qwen3_5.py", line 1769, in forward
+    outputs = self.model(
+              ^^^^^^^^^^^
+  File "/home/lz/miniconda3/envs/shine/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1736, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lz/miniconda3/envs/shine/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1747, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lz/miniconda3/envs/shine/lib/python3.12/site-packages/transformers/utils/generic.py", line 939, in wrapper
+    output = func(self, *args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lz/miniconda3/envs/shine/lib/python3.12/site-packages/transformers/models/qwen3_5/modeling_qwen3_5.py", line 1562, in forward
+    outputs = self.language_model(
+              ^^^^^^^^^^^^^^^^^^^^
+  File "/home/lz/miniconda3/envs/shine/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1736, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lz/miniconda3/envs/shine/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1747, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lz/miniconda3/envs/shine/lib/python3.12/site-packages/transformers/utils/generic.py", line 1068, in wrapper
+    output = func(self, *args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lz/miniconda3/envs/shine/lib/python3.12/site-packages/transformers/utils/output_capturing.py", line 262, in wrapper
+    outputs = func(self, *args, **kwargs)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lz/miniconda3/envs/shine/lib/python3.12/site-packages/transformers/models/qwen3_5/modeling_qwen3_5.py", line 1206, in forward
+    hidden_states = decoder_layer(
+                    ^^^^^^^^^^^^^^
+  File "/home/lz/miniconda3/envs/shine/lib/python3.12/site-packages/transformers/modeling_layers.py", line 114, in __call__
+    return super().__call__(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lz/miniconda3/envs/shine/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1736, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lz/miniconda3/envs/shine/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1747, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lz/miniconda3/envs/shine/lib/python3.12/site-packages/accelerate/hooks.py", line 192, in new_forward
+    output = module._old_forward(*args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lz/miniconda3/envs/shine/lib/python3.12/site-packages/transformers/models/qwen3_5/modeling_qwen3_5.py", line 771, in forward
+    hidden_states = self.linear_attn(
+                    ^^^^^^^^^^^^^^^^^
+  File "/home/lz/miniconda3/envs/shine/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1736, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lz/miniconda3/envs/shine/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1747, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lz/miniconda3/envs/shine/lib/python3.12/site-packages/accelerate/hooks.py", line 192, in new_forward
+    output = module._old_forward(*args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lz/miniconda3/envs/shine/lib/python3.12/site-packages/transformers/integrations/accelerate.py", line 1010, in wrapped
+    output = forward_func(self, *args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lz/miniconda3/envs/shine/lib/python3.12/site-packages/transformers/models/qwen3_5/modeling_qwen3_5.py", line 522, in forward
+    core_attn_out, last_recurrent_state = torch_chunk_gated_delta_rule(
+                                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lz/miniconda3/envs/shine/lib/python3.12/site-packages/transformers/integrations/hub_kernels.py", line 861, in wrapped
+    return implementation(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lz/miniconda3/envs/shine/lib/python3.12/site-packages/transformers/models/qwen3_5/modeling_qwen3_5.py", line 300, in torch_chunk_gated_delta_rule
+    k_cumdecay = attn @ (k_beta * g.exp().unsqueeze(-1))
+                 ~~~~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+torch.OutOfMemoryError: CUDA out of memory. Tried to allocate 36.00 MiB. GPU 3 has a total capacity of 23.54 GiB of which 11.19 MiB is free. Process 499152 has 17.52 GiB memory in use. Including non-PyTorch memory, this process has 6.00 GiB memory in use. Of the allocated memory 5.53 GiB is allocated by PyTorch, and 16.11 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://pytorch.org/docs/stable/notes/cuda.html#environment-variables)
+ERROR conda.cli.main_run:execute(142): `conda run python qa_gen/fact_extraction.py --input aggregated/squad/train.jsonl --prompt qa_gen/prompts/fact_extract_prompt.txt --output-dir qa_gen/nightly_squad_coqa/squad/facts --model /home/lz/hf_cache/hub/models--Qwen--Qwen3.5-9B/snapshots/c202236235762e1c871ad0ccb60c8ee5ba337b9a --batch-size 64 --max-new-tokens 32768 --retry-max-new-tokens 32768 --max-attempts 3 --device-map auto --torch-dtype auto` failed. (See above for error)
+[2026-09-07T01:45:28+08:00] start dataset=squad input=aggregated/squad/train.jsonl
+[2026-09-07T01:45:28+08:00] model=/home/lz/hf_cache/hub/models--Qwen--Qwen3.5-9B/snapshots/c202236235762e1c871ad0ccb60c8ee5ba337b9a gpus=0,1,2,3 max_samples=all
+[2026-09-07T01:45:28+08:00] fact extraction
+
+Loading weights:   0%|          | 0/760 [00:00<?, ?it/s]
+Loading weights:   0%|          | 1/760 [00:00<02:32,  4.98it/s]
+Loading weights:   9%|▊         | 65/760 [00:00<00:02, 247.98it/s]
+Loading weights:  13%|█▎        | 97/760 [00:00<00:02, 232.74it/s]
+Loading weights:  16%|█▋        | 124/760 [00:00<00:02, 220.58it/s]
+Loading weights:  20%|█▉        | 149/760 [00:00<00:03, 202.59it/s]
+Loading weights:  23%|██▎       | 172/760 [00:00<00:02, 204.40it/s]
+Loading weights:  26%|██▌       | 194/760 [00:00<00:02, 203.81it/s]
+Loading weights:  28%|██▊       | 215/760 [00:01<00:02, 183.92it/s]
+Loading weights:  31%|███       | 236/760 [00:01<00:02, 188.72it/s]
+Loading weights:  34%|███▎      | 256/760 [00:01<00:03, 157.14it/s]
+Loading weights:  36%|███▌      | 273/760 [00:01<00:03, 152.58it/s]
+Loading weights:  38%|███▊      | 289/760 [00:01<00:03, 141.11it/s]
+Loading weights:  40%|████      | 304/760 [00:01<00:03, 134.62it/s]
+Loading weights:  42%|████▏     | 318/760 [00:01<00:03, 111.05it/s]
+Loading weights:  44%|████▎     | 332/760 [00:02<00:03, 116.97it/s]
+Loading weights:  46%|████▌     | 346/760 [00:02<00:03, 115.95it/s]
+Loading weights:  47%|████▋     | 360/760 [00:02<00:03, 114.14it/s]
+Loading weights:  49%|████▉     | 372/760 [00:02<00:03, 102.44it/s]
+Loading weights:  51%|█████     | 385/760 [00:02<00:03, 103.07it/s]
+Loading weights:  53%|█████▎    | 400/760 [00:02<00:03, 110.75it/s]
+Loading weights:  54%|█████▍    | 414/760 [00:02<00:03, 113.35it/s]
+Loading weights:  56%|█████▌    | 426/760 [00:02<00:03, 109.83it/s]
+Loading weights:  68%|██████▊   | 519/760 [00:03<00:00, 321.15it/s]
+Loading weights:  81%|████████  | 615/760 [00:03<00:00, 492.50it/s]
+Loading weights:  94%|█████████▍| 715/760 [00:03<00:00, 633.29it/s]
+Loading weights: 100%|██████████| 760/760 [00:03<00:00, 228.87it/s]
+Traceback (most recent call last):
+  File "/data/lz/mqa/qa_gen/fact_extraction.py", line 411, in <module>
+    run(parse_args())
+  File "/data/lz/mqa/qa_gen/fact_extraction.py", line 302, in run
+    outputs = generate_batches(
+              ^^^^^^^^^^^^^^^^^
+  File "/data/lz/mqa/qa_gen/fact_extraction.py", line 192, in generate_batches
+    outputs = model.generate(
+              ^^^^^^^^^^^^^^^
+  File "/home/lz/miniconda3/envs/shine/lib/python3.12/site-packages/torch/utils/_contextlib.py", line 116, in decorate_context
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lz/miniconda3/envs/shine/lib/python3.12/site-packages/transformers/generation/utils.py", line 2668, in generate
+    result = decoding_method(
+             ^^^^^^^^^^^^^^^^
+  File "/home/lz/miniconda3/envs/shine/lib/python3.12/site-packages/transformers/generation/utils.py", line 2868, in _sample
+    outputs = self._prefill(
+              ^^^^^^^^^^^^^^
+  File "/home/lz/miniconda3/envs/shine/lib/python3.12/site-packages/transformers/generation/utils.py", line 3948, in _prefill
+    return self(**model_inputs, return_dict=True)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lz/miniconda3/envs/shine/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1736, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lz/miniconda3/envs/shine/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1747, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lz/miniconda3/envs/shine/lib/python3.12/site-packages/accelerate/hooks.py", line 192, in new_forward
+    output = module._old_forward(*args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lz/miniconda3/envs/shine/lib/python3.12/site-packages/transformers/utils/generic.py", line 939, in wrapper
+    output = func(self, *args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lz/miniconda3/envs/shine/lib/python3.12/site-packages/transformers/models/qwen3_5/modeling_qwen3_5.py", line 1769, in forward
+    outputs = self.model(
+              ^^^^^^^^^^^
+  File "/home/lz/miniconda3/envs/shine/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1736, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lz/miniconda3/envs/shine/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1747, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lz/miniconda3/envs/shine/lib/python3.12/site-packages/transformers/utils/generic.py", line 939, in wrapper
+    output = func(self, *args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lz/miniconda3/envs/shine/lib/python3.12/site-packages/transformers/models/qwen3_5/modeling_qwen3_5.py", line 1562, in forward
+    outputs = self.language_model(
+              ^^^^^^^^^^^^^^^^^^^^
+  File "/home/lz/miniconda3/envs/shine/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1736, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lz/miniconda3/envs/shine/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1747, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lz/miniconda3/envs/shine/lib/python3.12/site-packages/transformers/utils/generic.py", line 1068, in wrapper
+    output = func(self, *args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lz/miniconda3/envs/shine/lib/python3.12/site-packages/transformers/utils/output_capturing.py", line 262, in wrapper
+    outputs = func(self, *args, **kwargs)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lz/miniconda3/envs/shine/lib/python3.12/site-packages/transformers/models/qwen3_5/modeling_qwen3_5.py", line 1206, in forward
+    hidden_states = decoder_layer(
+                    ^^^^^^^^^^^^^^
+  File "/home/lz/miniconda3/envs/shine/lib/python3.12/site-packages/transformers/modeling_layers.py", line 114, in __call__
+    return super().__call__(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lz/miniconda3/envs/shine/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1736, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lz/miniconda3/envs/shine/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1747, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lz/miniconda3/envs/shine/lib/python3.12/site-packages/accelerate/hooks.py", line 192, in new_forward
+    output = module._old_forward(*args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lz/miniconda3/envs/shine/lib/python3.12/site-packages/transformers/models/qwen3_5/modeling_qwen3_5.py", line 771, in forward
+    hidden_states = self.linear_attn(
+                    ^^^^^^^^^^^^^^^^^
+  File "/home/lz/miniconda3/envs/shine/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1736, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lz/miniconda3/envs/shine/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1747, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lz/miniconda3/envs/shine/lib/python3.12/site-packages/accelerate/hooks.py", line 192, in new_forward
+    output = module._old_forward(*args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lz/miniconda3/envs/shine/lib/python3.12/site-packages/transformers/integrations/accelerate.py", line 1010, in wrapped
+    output = forward_func(self, *args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lz/miniconda3/envs/shine/lib/python3.12/site-packages/transformers/models/qwen3_5/modeling_qwen3_5.py", line 522, in forward
+    core_attn_out, last_recurrent_state = torch_chunk_gated_delta_rule(
+                                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lz/miniconda3/envs/shine/lib/python3.12/site-packages/transformers/integrations/hub_kernels.py", line 861, in wrapped
+    return implementation(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lz/miniconda3/envs/shine/lib/python3.12/site-packages/transformers/models/qwen3_5/modeling_qwen3_5.py", line 300, in torch_chunk_gated_delta_rule
+    k_cumdecay = attn @ (k_beta * g.exp().unsqueeze(-1))
+                 ~~~~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+torch.OutOfMemoryError: CUDA out of memory. Tried to allocate 36.00 MiB. GPU 3 has a total capacity of 23.54 GiB of which 11.19 MiB is free. Process 499152 has 17.52 GiB memory in use. Including non-PyTorch memory, this process has 6.00 GiB memory in use. Of the allocated memory 5.53 GiB is allocated by PyTorch, and 16.11 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://pytorch.org/docs/stable/notes/cuda.html#environment-variables)
+ERROR conda.cli.main_run:execute(142): `conda run python qa_gen/fact_extraction.py --input aggregated/squad/train.jsonl --prompt qa_gen/prompts/fact_extract_prompt.txt --output-dir qa_gen/nightly_squad_coqa/squad/facts --model /home/lz/hf_cache/hub/models--Qwen--Qwen3.5-9B/snapshots/c202236235762e1c871ad0ccb60c8ee5ba337b9a --batch-size 32 --max-new-tokens 32768 --retry-max-new-tokens 32768 --max-attempts 3 --device-map auto --torch-dtype auto` failed. (See above for error)
+[2026-09-07T01:45:59+08:00] start dataset=squad input=aggregated/squad/train.jsonl
+[2026-09-07T01:45:59+08:00] model=/home/lz/hf_cache/hub/models--Qwen--Qwen3.5-9B/snapshots/c202236235762e1c871ad0ccb60c8ee5ba337b9a gpus=0,1,2,3 max_samples=all
+[2026-09-07T01:45:59+08:00] fact extraction
+
+Loading weights:   0%|          | 0/760 [00:00<?, ?it/s]
+Loading weights:   0%|          | 1/760 [00:00<02:34,  4.91it/s]
+Loading weights:   9%|▊         | 66/760 [00:00<00:02, 260.05it/s]
+Loading weights:  13%|█▎        | 101/760 [00:00<00:03, 195.05it/s]
+Loading weights:  17%|█▋        | 127/760 [00:00<00:02, 211.47it/s]
+Loading weights:  20%|██        | 153/760 [00:00<00:03, 168.16it/s]
+Loading weights:  23%|██▎       | 174/760 [00:01<00:03, 164.38it/s]
+Loading weights:  26%|██▌       | 196/760 [00:01<00:03, 172.94it/s]
+Loading weights:  28%|██▊       | 216/760 [00:01<00:03, 159.92it/s]
+Loading weights:  31%|███       | 235/760 [00:01<00:03, 163.71it/s]
+Loading weights:  33%|███▎      | 253/760 [00:01<00:03, 162.82it/s]
+Loading weights:  36%|███▌      | 270/760 [00:01<00:03, 142.43it/s]
+Loading weights:  38%|███▊      | 286/760 [00:01<00:03, 139.10it/s]
+Loading weights:  40%|███▉      | 303/760 [00:01<00:03, 144.06it/s]
+Loading weights:  42%|████▏     | 318/760 [00:02<00:03, 130.79it/s]
+Loading weights:  44%|████▍     | 337/760 [00:02<00:02, 144.99it/s]
+Loading weights:  46%|████▋     | 353/760 [00:02<00:02, 148.52it/s]
+Loading weights:  49%|████▊     | 369/760 [00:02<00:03, 125.05it/s]
+Loading weights:  51%|█████     | 385/760 [00:02<00:02, 126.95it/s]
+Loading weights:  53%|█████▎    | 400/760 [00:02<00:02, 126.71it/s]
+Loading weights:  54%|█████▍    | 414/760 [00:02<00:02, 126.77it/s]
+Loading weights:  56%|█████▌    | 427/760 [00:02<00:02, 126.52it/s]
+Loading weights:  75%|███████▍  | 567/760 [00:02<00:00, 467.86it/s]
+Loading weights:  91%|█████████ | 692/760 [00:03<00:00, 684.57it/s]
+Loading weights: 100%|██████████| 760/760 [00:03<00:00, 242.22it/s]
+Traceback (most recent call last):
+  File "/data/lz/mqa/qa_gen/fact_extraction.py", line 411, in <module>
+    run(parse_args())
+  File "/data/lz/mqa/qa_gen/fact_extraction.py", line 302, in run
+    outputs = generate_batches(
+              ^^^^^^^^^^^^^^^^^
+  File "/data/lz/mqa/qa_gen/fact_extraction.py", line 192, in generate_batches
+    outputs = model.generate(
+              ^^^^^^^^^^^^^^^
+  File "/home/lz/miniconda3/envs/shine/lib/python3.12/site-packages/torch/utils/_contextlib.py", line 116, in decorate_context
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lz/miniconda3/envs/shine/lib/python3.12/site-packages/transformers/generation/utils.py", line 2668, in generate
+    result = decoding_method(
+             ^^^^^^^^^^^^^^^^
+  File "/home/lz/miniconda3/envs/shine/lib/python3.12/site-packages/transformers/generation/utils.py", line 2868, in _sample
+    outputs = self._prefill(
+              ^^^^^^^^^^^^^^
+  File "/home/lz/miniconda3/envs/shine/lib/python3.12/site-packages/transformers/generation/utils.py", line 3948, in _prefill
+    return self(**model_inputs, return_dict=True)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lz/miniconda3/envs/shine/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1736, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lz/miniconda3/envs/shine/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1747, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lz/miniconda3/envs/shine/lib/python3.12/site-packages/accelerate/hooks.py", line 192, in new_forward
+    output = module._old_forward(*args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lz/miniconda3/envs/shine/lib/python3.12/site-packages/transformers/utils/generic.py", line 939, in wrapper
+    output = func(self, *args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lz/miniconda3/envs/shine/lib/python3.12/site-packages/transformers/models/qwen3_5/modeling_qwen3_5.py", line 1769, in forward
+    outputs = self.model(
+              ^^^^^^^^^^^
+  File "/home/lz/miniconda3/envs/shine/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1736, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lz/miniconda3/envs/shine/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1747, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lz/miniconda3/envs/shine/lib/python3.12/site-packages/transformers/utils/generic.py", line 939, in wrapper
+    output = func(self, *args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lz/miniconda3/envs/shine/lib/python3.12/site-packages/transformers/models/qwen3_5/modeling_qwen3_5.py", line 1562, in forward
+    outputs = self.language_model(
+              ^^^^^^^^^^^^^^^^^^^^
+  File "/home/lz/miniconda3/envs/shine/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1736, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lz/miniconda3/envs/shine/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1747, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lz/miniconda3/envs/shine/lib/python3.12/site-packages/transformers/utils/generic.py", line 1068, in wrapper
+    output = func(self, *args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lz/miniconda3/envs/shine/lib/python3.12/site-packages/transformers/utils/output_capturing.py", line 262, in wrapper
+    outputs = func(self, *args, **kwargs)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lz/miniconda3/envs/shine/lib/python3.12/site-packages/transformers/models/qwen3_5/modeling_qwen3_5.py", line 1206, in forward
+    hidden_states = decoder_layer(
+                    ^^^^^^^^^^^^^^
+  File "/home/lz/miniconda3/envs/shine/lib/python3.12/site-packages/transformers/modeling_layers.py", line 114, in __call__
+    return super().__call__(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lz/miniconda3/envs/shine/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1736, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lz/miniconda3/envs/shine/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1747, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lz/miniconda3/envs/shine/lib/python3.12/site-packages/accelerate/hooks.py", line 192, in new_forward
+    output = module._old_forward(*args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lz/miniconda3/envs/shine/lib/python3.12/site-packages/transformers/models/qwen3_5/modeling_qwen3_5.py", line 771, in forward
+    hidden_states = self.linear_attn(
+                    ^^^^^^^^^^^^^^^^^
+  File "/home/lz/miniconda3/envs/shine/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1736, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lz/miniconda3/envs/shine/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1747, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lz/miniconda3/envs/shine/lib/python3.12/site-packages/accelerate/hooks.py", line 192, in new_forward
+    output = module._old_forward(*args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lz/miniconda3/envs/shine/lib/python3.12/site-packages/transformers/integrations/accelerate.py", line 1010, in wrapped
+    output = forward_func(self, *args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lz/miniconda3/envs/shine/lib/python3.12/site-packages/transformers/models/qwen3_5/modeling_qwen3_5.py", line 522, in forward
+    core_attn_out, last_recurrent_state = torch_chunk_gated_delta_rule(
+                                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lz/miniconda3/envs/shine/lib/python3.12/site-packages/transformers/integrations/hub_kernels.py", line 861, in wrapped
+    return implementation(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lz/miniconda3/envs/shine/lib/python3.12/site-packages/transformers/models/qwen3_5/modeling_qwen3_5.py", line 300, in torch_chunk_gated_delta_rule
+    k_cumdecay = attn @ (k_beta * g.exp().unsqueeze(-1))
+                 ~~~~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+torch.OutOfMemoryError: CUDA out of memory. Tried to allocate 36.00 MiB. GPU 3 has a total capacity of 23.54 GiB of which 11.19 MiB is free. Process 499152 has 17.52 GiB memory in use. Including non-PyTorch memory, this process has 6.00 GiB memory in use. Of the allocated memory 5.53 GiB is allocated by PyTorch, and 16.11 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://pytorch.org/docs/stable/notes/cuda.html#environment-variables)
+ERROR conda.cli.main_run:execute(142): `conda run python qa_gen/fact_extraction.py --input aggregated/squad/train.jsonl --prompt qa_gen/prompts/fact_extract_prompt.txt --output-dir qa_gen/nightly_squad_coqa/squad/facts --model /home/lz/hf_cache/hub/models--Qwen--Qwen3.5-9B/snapshots/c202236235762e1c871ad0ccb60c8ee5ba337b9a --batch-size 8 --max-new-tokens 32768 --retry-max-new-tokens 32768 --max-attempts 3 --device-map auto --torch-dtype auto` failed. (See above for error)
+[2026-09-07T01:46:28+08:00] start dataset=squad input=aggregated/squad/train.jsonl
+[2026-09-07T01:46:28+08:00] model=/home/lz/hf_cache/hub/models--Qwen--Qwen3.5-9B/snapshots/c202236235762e1c871ad0ccb60c8ee5ba337b9a gpus=0,1,2,3 max_samples=all
+[2026-09-07T01:46:28+08:00] fact extraction
+
+Loading weights:   0%|          | 0/760 [00:00<?, ?it/s]
+Loading weights:   0%|          | 1/760 [00:00<02:40,  4.74it/s]
+Loading weights:   9%|▊         | 65/760 [00:00<00:02, 248.66it/s]
+Loading weights:  13%|█▎        | 99/760 [00:00<00:02, 222.58it/s]
+Loading weights:  17%|█▋        | 127/760 [00:00<00:03, 209.08it/s]
+Loading weights:  20%|█▉        | 151/760 [00:00<00:03, 192.53it/s]
+Loading weights:  23%|██▎       | 173/760 [00:00<00:03, 158.69it/s]
+Loading weights:  25%|██▌       | 191/760 [00:01<00:03, 147.47it/s]
+Loading weights:  27%|██▋       | 207/760 [00:01<00:04, 121.65it/s]
+Loading weights:  30%|██▉       | 226/760 [00:01<00:04, 129.65it/s]
+Loading weights:  32%|███▏      | 240/760 [00:01<00:04, 126.30it/s]
+Loading weights:  33%|███▎      | 254/760 [00:01<00:04, 123.11it/s]
+Loading weights:  35%|███▌      | 267/760 [00:01<00:04, 112.57it/s]
+Loading weights:  37%|███▋      | 280/760 [00:01<00:04, 111.15it/s]
+Loading weights:  39%|███▊      | 294/760 [00:02<00:04, 112.42it/s]
+Loading weights:  41%|████      | 308/760 [00:02<00:03, 113.56it/s]
+Loading weights:  42%|████▏     | 320/760 [00:02<00:03, 111.31it/s]
+Loading weights:  44%|████▍     | 333/760 [00:02<00:03, 115.51it/s]
+Loading weights:  46%|████▌     | 347/760 [00:02<00:03, 114.65it/s]
+Loading weights:  48%|████▊     | 361/760 [00:02<00:03, 114.65it/s]
+Loading weights:  49%|████▉     | 373/760 [00:02<00:03, 111.61it/s]
+Loading weights:  51%|█████     | 386/760 [00:02<00:03, 109.17it/s]
+Loading weights:  53%|█████▎    | 400/760 [00:03<00:03, 107.45it/s]
+Loading weights:  54%|█████▍    | 413/760 [00:03<00:03, 113.07it/s]
+Loading weights:  56%|█████▌    | 425/760 [00:03<00:03, 101.70it/s]
+Loading weights:  73%|███████▎  | 553/760 [00:03<00:00, 398.34it/s]
+Loading weights:  89%|████████▊ | 673/760 [00:03<00:00, 610.21it/s]
+Loading weights: 100%|██████████| 760/760 [00:03<00:00, 210.84it/s]
+Traceback (most recent call last):
+  File "/data/lz/mqa/qa_gen/fact_extraction.py", line 411, in <module>
+    run(parse_args())
+  File "/data/lz/mqa/qa_gen/fact_extraction.py", line 302, in run
+    outputs = generate_batches(
+              ^^^^^^^^^^^^^^^^^
+  File "/data/lz/mqa/qa_gen/fact_extraction.py", line 192, in generate_batches
+    outputs = model.generate(
+              ^^^^^^^^^^^^^^^
+  File "/home/lz/miniconda3/envs/shine/lib/python3.12/site-packages/torch/utils/_contextlib.py", line 116, in decorate_context
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lz/miniconda3/envs/shine/lib/python3.12/site-packages/transformers/generation/utils.py", line 2668, in generate
+    result = decoding_method(
+             ^^^^^^^^^^^^^^^^
+  File "/home/lz/miniconda3/envs/shine/lib/python3.12/site-packages/transformers/generation/utils.py", line 2868, in _sample
+    outputs = self._prefill(
+              ^^^^^^^^^^^^^^
+  File "/home/lz/miniconda3/envs/shine/lib/python3.12/site-packages/transformers/generation/utils.py", line 3948, in _prefill
+    return self(**model_inputs, return_dict=True)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lz/miniconda3/envs/shine/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1736, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lz/miniconda3/envs/shine/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1747, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lz/miniconda3/envs/shine/lib/python3.12/site-packages/accelerate/hooks.py", line 192, in new_forward
+    output = module._old_forward(*args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lz/miniconda3/envs/shine/lib/python3.12/site-packages/transformers/utils/generic.py", line 939, in wrapper
+    output = func(self, *args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lz/miniconda3/envs/shine/lib/python3.12/site-packages/transformers/models/qwen3_5/modeling_qwen3_5.py", line 1769, in forward
+    outputs = self.model(
+              ^^^^^^^^^^^
+  File "/home/lz/miniconda3/envs/shine/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1736, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lz/miniconda3/envs/shine/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1747, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lz/miniconda3/envs/shine/lib/python3.12/site-packages/transformers/utils/generic.py", line 939, in wrapper
+    output = func(self, *args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lz/miniconda3/envs/shine/lib/python3.12/site-packages/transformers/models/qwen3_5/modeling_qwen3_5.py", line 1562, in forward
+    outputs = self.language_model(
+              ^^^^^^^^^^^^^^^^^^^^
+  File "/home/lz/miniconda3/envs/shine/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1736, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lz/miniconda3/envs/shine/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1747, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lz/miniconda3/envs/shine/lib/python3.12/site-packages/transformers/utils/generic.py", line 1068, in wrapper
+    output = func(self, *args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lz/miniconda3/envs/shine/lib/python3.12/site-packages/transformers/utils/output_capturing.py", line 262, in wrapper
+    outputs = func(self, *args, **kwargs)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lz/miniconda3/envs/shine/lib/python3.12/site-packages/transformers/models/qwen3_5/modeling_qwen3_5.py", line 1206, in forward
+    hidden_states = decoder_layer(
+                    ^^^^^^^^^^^^^^
+  File "/home/lz/miniconda3/envs/shine/lib/python3.12/site-packages/transformers/modeling_layers.py", line 114, in __call__
+    return super().__call__(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lz/miniconda3/envs/shine/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1736, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lz/miniconda3/envs/shine/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1747, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lz/miniconda3/envs/shine/lib/python3.12/site-packages/accelerate/hooks.py", line 192, in new_forward
+    output = module._old_forward(*args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lz/miniconda3/envs/shine/lib/python3.12/site-packages/transformers/models/qwen3_5/modeling_qwen3_5.py", line 771, in forward
+    hidden_states = self.linear_attn(
+                    ^^^^^^^^^^^^^^^^^
+  File "/home/lz/miniconda3/envs/shine/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1736, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lz/miniconda3/envs/shine/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1747, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lz/miniconda3/envs/shine/lib/python3.12/site-packages/accelerate/hooks.py", line 192, in new_forward
+    output = module._old_forward(*args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lz/miniconda3/envs/shine/lib/python3.12/site-packages/transformers/integrations/accelerate.py", line 1010, in wrapped
+    output = forward_func(self, *args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lz/miniconda3/envs/shine/lib/python3.12/site-packages/transformers/models/qwen3_5/modeling_qwen3_5.py", line 522, in forward
+    core_attn_out, last_recurrent_state = torch_chunk_gated_delta_rule(
+                                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lz/miniconda3/envs/shine/lib/python3.12/site-packages/transformers/integrations/hub_kernels.py", line 861, in wrapped
+    return implementation(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lz/miniconda3/envs/shine/lib/python3.12/site-packages/transformers/models/qwen3_5/modeling_qwen3_5.py", line 300, in torch_chunk_gated_delta_rule
+    k_cumdecay = attn @ (k_beta * g.exp().unsqueeze(-1))
+                 ~~~~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+torch.OutOfMemoryError: CUDA out of memory. Tried to allocate 36.00 MiB. GPU 3 has a total capacity of 23.54 GiB of which 11.19 MiB is free. Process 499152 has 17.52 GiB memory in use. Including non-PyTorch memory, this process has 6.00 GiB memory in use. Of the allocated memory 5.53 GiB is allocated by PyTorch, and 16.11 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://pytorch.org/docs/stable/notes/cuda.html#environment-variables)
+ERROR conda.cli.main_run:execute(142): `conda run python qa_gen/fact_extraction.py --input aggregated/squad/train.jsonl --prompt qa_gen/prompts/fact_extract_prompt.txt --output-dir qa_gen/nightly_squad_coqa/squad/facts --model /home/lz/hf_cache/hub/models--Qwen--Qwen3.5-9B/snapshots/c202236235762e1c871ad0ccb60c8ee5ba337b9a --batch-size 4 --max-new-tokens 32768 --retry-max-new-tokens 32768 --max-attempts 3 --device-map auto --torch-dtype auto` failed. (See above for error)
+[2026-09-07T01:46:51+08:00] start dataset=squad input=aggregated/squad/train.jsonl
+[2026-09-07T01:46:51+08:00] model=/home/lz/hf_cache/hub/models--Qwen--Qwen3.5-9B/snapshots/c202236235762e1c871ad0ccb60c8ee5ba337b9a gpus=0,1,2,3 max_samples=all
+[2026-09-07T01:46:51+08:00] fact extraction
+[2026-09-07T02:08:37+08:00] start dataset=squad input=aggregated/squad/train.jsonl
+[2026-09-07T02:08:37+08:00] model=/home/lz/hf_cache/hub/models--Qwen--Qwen3.5-9B/snapshots/c202236235762e1c871ad0ccb60c8ee5ba337b9a gpus=0,1,2,3 max_samples=all
+[2026-09-07T02:08:37+08:00] fact extraction
+
+Loading weights:   0%|          | 0/760 [00:00<?, ?it/s]
+Loading weights:   0%|          | 1/760 [00:00<02:51,  4.42it/s]
+Loading weights:   9%|▉         | 67/760 [00:00<00:02, 253.20it/s]
+Loading weights:  14%|█▍        | 105/760 [00:00<00:03, 190.09it/s]
+Loading weights:  17%|█▋        | 132/760 [00:00<00:03, 191.14it/s]
+Loading weights:  21%|██        | 156/760 [00:00<00:03, 152.34it/s]
+Loading weights:  23%|██▎       | 175/760 [00:01<00:03, 152.07it/s]
+Loading weights:  26%|██▌       | 196/760 [00:01<00:03, 158.17it/s]
+Loading weights:  28%|██▊       | 214/760 [00:01<00:03, 142.13it/s]
+Loading weights:  30%|███       | 230/760 [00:01<00:03, 145.63it/s]
+Loading weights:  32%|███▏      | 246/760 [00:01<00:03, 142.35it/s]
+Loading weights:  34%|███▍      | 261/760 [00:01<00:04, 112.58it/s]
+Loading weights:  37%|███▋      | 278/760 [00:01<00:03, 124.09it/s]
+Loading weights:  38%|███▊      | 292/760 [00:02<00:03, 119.96it/s]
+Loading weights:  40%|████      | 305/760 [00:02<00:03, 122.30it/s]
+Loading weights:  42%|████▏     | 318/760 [00:02<00:04, 101.33it/s]
+Loading weights:  44%|████▍     | 333/760 [00:02<00:04, 105.72it/s]
+Loading weights:  46%|████▌     | 347/760 [00:02<00:03, 106.92it/s]
+Loading weights:  48%|████▊     | 361/760 [00:02<00:03, 107.48it/s]
+Loading weights:  49%|████▉     | 373/760 [00:02<00:03, 105.37it/s]
+Loading weights:  51%|█████     | 386/760 [00:02<00:03, 104.62it/s]
+Loading weights:  53%|█████▎    | 400/760 [00:03<00:03, 106.06it/s]
+Loading weights:  54%|█████▍    | 414/760 [00:03<00:03, 107.35it/s]
+Loading weights:  56%|█████▌    | 425/760 [00:03<00:03, 103.28it/s]
+Loading weights:  74%|███████▍  | 566/760 [00:03<00:00, 434.85it/s]
+Loading weights:  91%|█████████▏| 695/760 [00:03<00:00, 661.58it/s]
+Loading weights: 100%|██████████| 760/760 [00:03<00:00, 210.49it/s]
+
+Fact extraction:   0%|          | 0/1 [00:00<?, ?batch/s]
+Fact extraction:   0%|          | 0/1 [00:01<?, ?batch/s]
+Traceback (most recent call last):
+  File "/data/lz/mqa/qa_gen/fact_extraction.py", line 416, in <module>
+    run(parse_args())
+  File "/data/lz/mqa/qa_gen/fact_extraction.py", line 307, in run
+    outputs = generate_batches(
+              ^^^^^^^^^^^^^^^^^
+  File "/data/lz/mqa/qa_gen/fact_extraction.py", line 197, in generate_batches
+    outputs = model.generate(
+              ^^^^^^^^^^^^^^^
+  File "/home/lz/miniconda3/envs/shine/lib/python3.12/site-packages/torch/utils/_contextlib.py", line 116, in decorate_context
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lz/miniconda3/envs/shine/lib/python3.12/site-packages/transformers/generation/utils.py", line 2668, in generate
+    result = decoding_method(
+             ^^^^^^^^^^^^^^^^
+  File "/home/lz/miniconda3/envs/shine/lib/python3.12/site-packages/transformers/generation/utils.py", line 2868, in _sample
+    outputs = self._prefill(
+              ^^^^^^^^^^^^^^
+  File "/home/lz/miniconda3/envs/shine/lib/python3.12/site-packages/transformers/generation/utils.py", line 3948, in _prefill
+    return self(**model_inputs, return_dict=True)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lz/miniconda3/envs/shine/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1736, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lz/miniconda3/envs/shine/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1747, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lz/miniconda3/envs/shine/lib/python3.12/site-packages/accelerate/hooks.py", line 192, in new_forward
+    output = module._old_forward(*args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lz/miniconda3/envs/shine/lib/python3.12/site-packages/transformers/utils/generic.py", line 939, in wrapper
+    output = func(self, *args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lz/miniconda3/envs/shine/lib/python3.12/site-packages/transformers/models/qwen3_5/modeling_qwen3_5.py", line 1769, in forward
+    outputs = self.model(
+              ^^^^^^^^^^^
+  File "/home/lz/miniconda3/envs/shine/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1736, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lz/miniconda3/envs/shine/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1747, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lz/miniconda3/envs/shine/lib/python3.12/site-packages/transformers/utils/generic.py", line 939, in wrapper
+    output = func(self, *args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lz/miniconda3/envs/shine/lib/python3.12/site-packages/transformers/models/qwen3_5/modeling_qwen3_5.py", line 1562, in forward
+    outputs = self.language_model(
+              ^^^^^^^^^^^^^^^^^^^^
+  File "/home/lz/miniconda3/envs/shine/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1736, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lz/miniconda3/envs/shine/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1747, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lz/miniconda3/envs/shine/lib/python3.12/site-packages/transformers/utils/generic.py", line 1068, in wrapper
+    output = func(self, *args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lz/miniconda3/envs/shine/lib/python3.12/site-packages/transformers/utils/output_capturing.py", line 262, in wrapper
+    outputs = func(self, *args, **kwargs)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lz/miniconda3/envs/shine/lib/python3.12/site-packages/transformers/models/qwen3_5/modeling_qwen3_5.py", line 1206, in forward
+    hidden_states = decoder_layer(
+                    ^^^^^^^^^^^^^^
+  File "/home/lz/miniconda3/envs/shine/lib/python3.12/site-packages/transformers/modeling_layers.py", line 114, in __call__
+    return super().__call__(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lz/miniconda3/envs/shine/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1736, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lz/miniconda3/envs/shine/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1747, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lz/miniconda3/envs/shine/lib/python3.12/site-packages/accelerate/hooks.py", line 192, in new_forward
+    output = module._old_forward(*args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lz/miniconda3/envs/shine/lib/python3.12/site-packages/transformers/models/qwen3_5/modeling_qwen3_5.py", line 771, in forward
+    hidden_states = self.linear_attn(
+                    ^^^^^^^^^^^^^^^^^
+  File "/home/lz/miniconda3/envs/shine/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1736, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lz/miniconda3/envs/shine/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1747, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lz/miniconda3/envs/shine/lib/python3.12/site-packages/accelerate/hooks.py", line 192, in new_forward
+    output = module._old_forward(*args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lz/miniconda3/envs/shine/lib/python3.12/site-packages/transformers/integrations/accelerate.py", line 1010, in wrapped
+    output = forward_func(self, *args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lz/miniconda3/envs/shine/lib/python3.12/site-packages/transformers/models/qwen3_5/modeling_qwen3_5.py", line 522, in forward
+    core_attn_out, last_recurrent_state = torch_chunk_gated_delta_rule(
+                                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lz/miniconda3/envs/shine/lib/python3.12/site-packages/transformers/integrations/hub_kernels.py", line 861, in wrapped
+    return implementation(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lz/miniconda3/envs/shine/lib/python3.12/site-packages/transformers/models/qwen3_5/modeling_qwen3_5.py", line 300, in torch_chunk_gated_delta_rule
+    k_cumdecay = attn @ (k_beta * g.exp().unsqueeze(-1))
+                 ~~~~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+torch.OutOfMemoryError: CUDA out of memory. Tried to allocate 36.00 MiB. GPU 3 has a total capacity of 23.54 GiB of which 11.19 MiB is free. Process 499152 has 17.52 GiB memory in use. Including non-PyTorch memory, this process has 6.00 GiB memory in use. Of the allocated memory 5.53 GiB is allocated by PyTorch, and 16.11 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://pytorch.org/docs/stable/notes/cuda.html#environment-variables)
+ERROR conda.cli.main_run:execute(142): `conda run python qa_gen/fact_extraction.py --input aggregated/squad/train.jsonl --prompt qa_gen/prompts/fact_extract_prompt.txt --output-dir qa_gen/nightly_squad_coqa/squad/facts --model /home/lz/hf_cache/hub/models--Qwen--Qwen3.5-9B/snapshots/c202236235762e1c871ad0ccb60c8ee5ba337b9a --batch-size 2 --max-new-tokens 32768 --retry-max-new-tokens 32768 --max-attempts 3 --device-map auto --torch-dtype auto` failed. (See above for error)
+[2026-09-07T02:09:07+08:00] start dataset=squad input=aggregated/squad/train.jsonl
+[2026-09-07T02:09:07+08:00] model=/home/lz/hf_cache/hub/models--Qwen--Qwen3.5-9B/snapshots/c202236235762e1c871ad0ccb60c8ee5ba337b9a gpus=0,1,2,3 max_samples=all
+[2026-09-07T02:09:07+08:00] fact extraction
+{"input": "aggregated/squad/train.jsonl", "output": "qa_gen/nightly_squad_coqa/squad/facts/facts.jsonl", "failed": "qa_gen/nightly_squad_coqa/squad/facts/failed.jsonl", "total": 2, "valid_json": 2, "written": 2, "rejected": 0, "error_counts": {}}
+
+Loading weights:   0%|          | 0/760 [00:00<?, ?it/s]
+Loading weights:   0%|          | 1/760 [00:00<02:30,  5.05it/s]
+Loading weights:   6%|▌         | 46/760 [00:00<00:04, 176.76it/s]
+Loading weights:   9%|▉         | 69/760 [00:00<00:04, 165.22it/s]
+Loading weights:  12%|█▏        | 89/760 [00:00<00:03, 173.42it/s]
+Loading weights:  14%|█▍        | 109/760 [00:00<00:04, 149.02it/s]
+Loading weights:  17%|█▋        | 126/760 [00:00<00:04, 148.38it/s]
+Loading weights:  19%|█▉        | 146/760 [00:00<00:03, 159.96it/s]
+Loading weights:  21%|██▏       | 163/760 [00:01<00:04, 145.74it/s]
+Loading weights:  24%|██▎       | 179/760 [00:01<00:03, 145.67it/s]
+Loading weights:  26%|██▋       | 200/760 [00:01<00:03, 151.89it/s]
+Loading weights:  28%|██▊       | 216/760 [00:01<00:03, 145.73it/s]
+Loading weights:  31%|███▏      | 238/760 [00:01<00:03, 155.57it/s]
+Loading weights:  33%|███▎      | 254/760 [00:01<00:03, 151.85it/s]
+Loading weights:  36%|███▌      | 270/760 [00:01<00:03, 145.58it/s]
+Loading weights:  38%|███▊      | 287/760 [00:01<00:03, 150.60it/s]
+Loading weights:  40%|███▉      | 303/760 [00:02<00:03, 147.57it/s]
+Loading weights:  42%|████▏     | 318/760 [00:02<00:03, 138.54it/s]
+Loading weights:  45%|████▌     | 344/760 [00:02<00:02, 170.08it/s]
+Loading weights:  48%|████▊     | 362/760 [00:02<00:02, 143.73it/s]
+Loading weights:  50%|█████     | 380/760 [00:02<00:02, 148.72it/s]
+Loading weights:  52%|█████▏    | 397/760 [00:02<00:02, 148.62it/s]
+Loading weights:  54%|█████▍    | 413/760 [00:02<00:02, 131.61it/s]
+Loading weights:  56%|█████▌    | 427/760 [00:02<00:02, 121.27it/s]
+Loading weights:  70%|██████▉   | 531/760 [00:03<00:00, 341.86it/s]
+Loading weights:  83%|████████▎ | 628/760 [00:03<00:00, 500.57it/s]
+Loading weights:  96%|█████████▌| 729/760 [00:03<00:00, 636.16it/s]
+Loading weights: 100%|██████████| 760/760 [00:03<00:00, 228.82it/s]
+
+Fact extraction:   0%|          | 0/2 [00:00<?, ?batch/s]
+Fact extraction:  50%|█████     | 1/2 [00:31<00:31, 31.67s/batch]
+Fact extraction: 100%|██████████| 2/2 [02:04<00:00, 67.76s/batch]
+Fact extraction: 100%|██████████| 2/2 [02:04<00:00, 62.34s/batch]
+
+Validating facts:   0%|          | 0/2 [00:00<?, ?record/s]
+Validating facts: 100%|██████████| 2/2 [00:00<00:00, 2337.96record/s]
+[2026-09-07T02:11:26+08:00] multi-turn QA generation
+
+Loading weights:   0%|          | 0/760 [00:00<?, ?it/s]
+Loading weights:   0%|          | 1/760 [00:00<02:28,  5.10it/s]
+Loading weights:   6%|▌         | 43/760 [00:00<00:04, 161.45it/s]
+Loading weights:   8%|▊         | 63/760 [00:00<00:04, 152.10it/s]
+Loading weights:  11%|█         | 81/760 [00:00<00:05, 124.43it/s]
+Loading weights:  13%|█▎        | 96/760 [00:00<00:05, 123.54it/s]
+Loading weights:  14%|█▍        | 110/760 [00:00<00:05, 126.04it/s]
+Loading weights:  16%|█▋        | 124/760 [00:01<00:05, 121.61it/s]
+Loading weights:  18%|█▊        | 137/760 [00:01<00:05, 118.54it/s]
+Loading weights:  20%|█▉        | 150/760 [00:01<00:05, 115.24it/s]
+Loading weights:  21%|██▏       | 162/760 [00:01<00:05, 113.67it/s]
+Loading weights:  23%|██▎       | 174/760 [00:01<00:05, 108.77it/s]
+Loading weights:  25%|██▍       | 188/760 [00:01<00:05, 112.44it/s]
+Loading weights:  27%|██▋       | 202/760 [00:01<00:04, 114.38it/s]
+Loading weights:  28%|██▊       | 214/760 [00:01<00:04, 113.59it/s]
+Loading weights:  30%|██▉       | 227/760 [00:01<00:04, 111.13it/s]
+Loading weights:  32%|███▏      | 241/760 [00:02<00:04, 111.60it/s]
+Loading weights:  34%|███▎      | 255/760 [00:02<00:04, 111.58it/s]
+Loading weights:  35%|███▌      | 267/760 [00:02<00:04, 107.84it/s]
+Loading weights:  37%|███▋      | 280/760 [00:02<00:04, 105.90it/s]
+Loading weights:  39%|███▊      | 294/760 [00:02<00:04, 107.09it/s]
+Loading weights:  41%|████      | 308/760 [00:02<00:04, 108.11it/s]
+Loading weights:  42%|████▏     | 319/760 [00:02<00:04, 103.66it/s]
+Loading weights:  44%|████▍     | 333/760 [00:02<00:03, 111.70it/s]
+Loading weights:  46%|████▌     | 346/760 [00:03<00:03, 108.96it/s]
+Loading weights:  47%|████▋     | 360/760 [00:03<00:03, 116.94it/s]
+Loading weights:  49%|████▉     | 372/760 [00:03<00:03, 104.09it/s]
+Loading weights:  51%|█████     | 385/760 [00:03<00:03, 110.58it/s]
+Loading weights:  52%|█████▎    | 399/760 [00:03<00:03, 104.07it/s]
+Loading weights:  54%|█████▍    | 413/760 [00:03<00:03, 113.01it/s]
+Loading weights:  56%|█████▌    | 425/760 [00:03<00:03, 102.36it/s]
+Loading weights:  73%|███████▎  | 556/760 [00:03<00:00, 405.60it/s]
+Loading weights:  89%|████████▊ | 673/760 [00:04<00:00, 607.36it/s]
+Loading weights: 100%|██████████| 760/760 [00:04<00:00, 185.70it/s]
+
+QA generation:   0%|          | 0/2 [00:00<?, ?batch/s]
+QA generation:  50%|█████     | 1/2 [01:43<01:43, 103.96s/batch]
+QA generation:  50%|█████     | 1/2 [01:44<01:44, 104.63s/batch]
+Traceback (most recent call last):
+  File "/data/lz/mqa/qa_gen/multiturn_qa_generation.py", line 213, in <module>
+    run(parse_args())
+  File "/data/lz/mqa/qa_gen/multiturn_qa_generation.py", line 182, in run
+    raw_outputs = generate_batches(model, processor, device, batches, args.max_new_tokens)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/lz/mqa/qa_gen/multiturn_qa_generation.py", line 80, in generate_batches
+    generated = model.generate(**inputs, max_new_tokens=max_new_tokens, do_sample=sample, **({"temperature": 0.6, "top_p": 0.9} if sample else {}))
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lz/miniconda3/envs/shine/lib/python3.12/site-packages/torch/utils/_contextlib.py", line 116, in decorate_context
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lz/miniconda3/envs/shine/lib/python3.12/site-packages/transformers/generation/utils.py", line 2668, in generate
+    result = decoding_method(
+             ^^^^^^^^^^^^^^^^
+  File "/home/lz/miniconda3/envs/shine/lib/python3.12/site-packages/transformers/generation/utils.py", line 2868, in _sample
+    outputs = self._prefill(
+              ^^^^^^^^^^^^^^
+  File "/home/lz/miniconda3/envs/shine/lib/python3.12/site-packages/transformers/generation/utils.py", line 3948, in _prefill
+    return self(**model_inputs, return_dict=True)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lz/miniconda3/envs/shine/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1736, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lz/miniconda3/envs/shine/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1747, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lz/miniconda3/envs/shine/lib/python3.12/site-packages/accelerate/hooks.py", line 192, in new_forward
+    output = module._old_forward(*args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lz/miniconda3/envs/shine/lib/python3.12/site-packages/transformers/utils/generic.py", line 939, in wrapper
+    output = func(self, *args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lz/miniconda3/envs/shine/lib/python3.12/site-packages/transformers/models/qwen3_5/modeling_qwen3_5.py", line 1769, in forward
+    outputs = self.model(
+              ^^^^^^^^^^^
+  File "/home/lz/miniconda3/envs/shine/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1736, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lz/miniconda3/envs/shine/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1747, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lz/miniconda3/envs/shine/lib/python3.12/site-packages/transformers/utils/generic.py", line 939, in wrapper
+    output = func(self, *args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lz/miniconda3/envs/shine/lib/python3.12/site-packages/transformers/models/qwen3_5/modeling_qwen3_5.py", line 1562, in forward
+    outputs = self.language_model(
+              ^^^^^^^^^^^^^^^^^^^^
+  File "/home/lz/miniconda3/envs/shine/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1736, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lz/miniconda3/envs/shine/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1747, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lz/miniconda3/envs/shine/lib/python3.12/site-packages/transformers/utils/generic.py", line 1068, in wrapper
+    output = func(self, *args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lz/miniconda3/envs/shine/lib/python3.12/site-packages/transformers/utils/output_capturing.py", line 262, in wrapper
+    outputs = func(self, *args, **kwargs)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lz/miniconda3/envs/shine/lib/python3.12/site-packages/transformers/models/qwen3_5/modeling_qwen3_5.py", line 1206, in forward
+    hidden_states = decoder_layer(
+                    ^^^^^^^^^^^^^^
+  File "/home/lz/miniconda3/envs/shine/lib/python3.12/site-packages/transformers/modeling_layers.py", line 114, in __call__
+    return super().__call__(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lz/miniconda3/envs/shine/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1736, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lz/miniconda3/envs/shine/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1747, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lz/miniconda3/envs/shine/lib/python3.12/site-packages/accelerate/hooks.py", line 192, in new_forward
+    output = module._old_forward(*args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lz/miniconda3/envs/shine/lib/python3.12/site-packages/transformers/models/qwen3_5/modeling_qwen3_5.py", line 771, in forward
+    hidden_states = self.linear_attn(
+                    ^^^^^^^^^^^^^^^^^
+  File "/home/lz/miniconda3/envs/shine/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1736, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lz/miniconda3/envs/shine/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1747, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lz/miniconda3/envs/shine/lib/python3.12/site-packages/accelerate/hooks.py", line 192, in new_forward
+    output = module._old_forward(*args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lz/miniconda3/envs/shine/lib/python3.12/site-packages/transformers/integrations/accelerate.py", line 1010, in wrapped
+    output = forward_func(self, *args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lz/miniconda3/envs/shine/lib/python3.12/site-packages/transformers/models/qwen3_5/modeling_qwen3_5.py", line 522, in forward
+    core_attn_out, last_recurrent_state = torch_chunk_gated_delta_rule(
+                                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lz/miniconda3/envs/shine/lib/python3.12/site-packages/transformers/integrations/hub_kernels.py", line 861, in wrapped
+    return implementation(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lz/miniconda3/envs/shine/lib/python3.12/site-packages/transformers/models/qwen3_5/modeling_qwen3_5.py", line 300, in torch_chunk_gated_delta_rule
+    k_cumdecay = attn @ (k_beta * g.exp().unsqueeze(-1))
+                 ~~~~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+torch.OutOfMemoryError: CUDA out of memory. Tried to allocate 36.00 MiB. GPU 3 has a total capacity of 23.54 GiB of which 23.19 MiB is free. Process 499152 has 17.51 GiB memory in use. Including non-PyTorch memory, this process has 5.99 GiB memory in use. Of the allocated memory 5.51 GiB is allocated by PyTorch, and 24.55 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://pytorch.org/docs/stable/notes/cuda.html#environment-variables)
+ERROR conda.cli.main_run:execute(142): `conda run python qa_gen/multiturn_qa_generation.py --input qa_gen/nightly_squad_coqa/squad/facts/facts.jsonl --prompt qa_gen/prompts/multiturn_qa_prompt.txt --output-dir qa_gen/nightly_squad_coqa/squad/qa --model /home/lz/hf_cache/hub/models--Qwen--Qwen3.5-9B/snapshots/c202236235762e1c871ad0ccb60c8ee5ba337b9a --batch-size 1 --max-new-tokens 32768 --device-map auto --torch-dtype auto` failed. (See above for error)

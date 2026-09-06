@@ -8,6 +8,11 @@ from typing import Any
 
 import torch
 from transformers import AutoModelForMultimodalLM, AutoProcessor
+try:
+    from tqdm.auto import tqdm
+except ImportError:  # pragma: no cover - keeps the script usable without tqdm
+    def tqdm(iterable, **kwargs):
+        return iterable
 
 try:
     from .utils import (
@@ -58,7 +63,7 @@ def build_prompt_items(records: list[dict[str, Any]], template: str, processor: 
 
 def generate_audits(model: Any, processor: Any, device: torch.device, batches: list[list[PromptItem]], max_new_tokens: int) -> dict[int, str]:
     outputs: dict[int, str] = {}
-    for batch in batches:
+    for batch in tqdm(batches, desc="QA audit", unit="batch"):
         messages = [[{"role": "user", "content": x.prompt}] for x in batch]
         inputs = processor.apply_chat_template(messages, tokenize=True, add_generation_prompt=True, enable_thinking=False, return_dict=True, return_tensors="pt", processor_kwargs={"padding": True})
         inputs = {k: v.to(device) if isinstance(v, torch.Tensor) else v for k, v in inputs.items()}
@@ -179,7 +184,7 @@ def run(args: argparse.Namespace) -> Path:
     raw = generate_audits(model, processor, device, batches, args.max_new_tokens)
     audits: list[dict[str, Any]] = []
     accepted_records: dict[str, dict[str, Any]] = {}
-    for item in items:
+    for item in tqdm(items, desc="Auditing records", unit="record"):
         initial = audit_record(item.record, raw[item.index])
         if initial["accepted"] or args.max_regenerations == 0:
             initial["attempts"] = [dict(initial)]

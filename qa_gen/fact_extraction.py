@@ -13,6 +13,11 @@ from typing import Any, Sequence
 
 import torch
 from transformers import AutoModelForMultimodalLM, AutoProcessor
+try:
+    from tqdm.auto import tqdm
+except ImportError:  # pragma: no cover - keeps the script usable without tqdm
+    def tqdm(iterable, **kwargs):
+        return iterable
 
 try:
     from .utils import (
@@ -173,7 +178,7 @@ def generate_batches(
     by input index.
     """
     generated_texts: dict[int, str] = {}
-    for prompt_batch in prompt_batches:
+    for prompt_batch in tqdm(prompt_batches, desc="Fact extraction", unit="batch"):
         messages = [[{"role": "user", "content": item.prompt}] for item in prompt_batch]
         inputs = processor.apply_chat_template(
             messages,
@@ -307,7 +312,7 @@ def run(args: argparse.Namespace) -> Path:
     valid_json = 0
     rejected = 0
     error_counts: dict[str, int] = {}
-    for item in prompt_items:
+    for item in tqdm(prompt_items, desc="Validating facts", unit="record"):
         record = item.record
         raw_text = outputs[item.index]
         parsed, parse_error = parse_json_object(raw_text)
