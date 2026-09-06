@@ -1,0 +1,28 @@
+{
+  "qasper": {
+    "status": "downloaded_and_standardized",
+    "license": "CC BY 4.0",
+    "source": "https://qasper-dataset.s3.us-west-2.amazonaws.com/qasper-train-dev-v0.3.tgz and qasper-test-and-evaluator-v0.3.tgz",
+    "raw": "raw/qasper/",
+    "standardized": "standardized/qasper/",
+    "counts": {"train": 2593, "validation": 1005, "test": 1451},
+    "context": "full paper text assembled from title, abstract, and section paragraphs; evidence retained per QA"
+  },
+  "scidqa": {
+    "status": "downloaded_and_standardized",
+    "license": "ODC-By 1.0",
+    "source": "https://github.com/yale-nlp/SciDQA and OSF project https://osf.io/3g2hn/",
+    "raw": "raw/scidqa/",
+    "standardized": "standardized/scidqa/",
+    "counts": {"train": 2937, "multidoc": 315},
+    "context": "full paper text from papers_fulltext_nougat.pkl; title/abstract fallback only when needed"
+  },
+  "peerqa": {
+    "status": "blocked_at_source",
+    "license": "CC BY-NC-SA 4.0",
+    "source": "https://github.com/UKPLab/PeerQA",
+    "raw": "raw/peerqa/",
+    "standardized": "standardized/peerqa/",
+    "note": "Official TU Darmstadt ZIP currently returns an anti-bot HTML page. No unverified mirror was used. Retry with scripts/download_peerqa.sh when accessible."
+  }
+}

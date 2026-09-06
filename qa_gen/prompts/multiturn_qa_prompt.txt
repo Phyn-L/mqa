@@ -1,0 +1,43 @@
+You are constructing a high-quality conversational question-answering dataset from one context and its atomic facts.
+The context and facts are the only source of truth. Do not use outside knowledge and do not alter the supplied context or fact objects.
+
+Your task is to produce ONE coherent multi-turn conversation that exhausts useful information in the context.
+Generate 4-8 turns when the context supports it; use fewer only when there is genuinely insufficient information.
+This must be a conversation, not a list of unrelated QA pairs. Follow this progression when supported by the facts:
+1. Begin with a self-contained retrieval question.
+2. Add follow-up questions that use genuine anaphora, ellipsis, or references to the previous answer (for example, "What happened next?", "How did that compare?").
+3. Cover complementary facts with comparison, temporal order, cause/consequence, or multi-hop questions when the context supports them.
+4. End with a synthesis question that combines several important facts.
+Do not force an operation that the context cannot support.
+
+Conversation quality requirements:
+- Every turn must be answerable from the context and the preceding conversation.
+- For each turn, list the exact fact_id values needed to answer it in required_facts.
+- depends_on_turns must list earlier turn_ids whose answers are genuinely needed. Set requires_history=true for such turns.
+- A later question must become ambiguous, incomplete, or materially different if its declared history is removed; do not merely repeat an independent question.
+- Include as many high-importance facts as possible, but never invent a relation, number, date, entity, or causal claim.
+- Answers should be concise, natural, and fully supported. Each evidence item must be a verbatim contiguous substring of the context.
+- For an update/comparison, explicitly distinguish old and current values when both occur.
+- Questions and answers may paraphrase wording, but must preserve every factual detail.
+- Do not output hidden reasoning or a markdown code fence. Output only one valid JSON object.
+
+Required output schema:
+{
+  "context_id": "<copy exactly>",
+  "source": {"dataset": "<copy exactly>", "split": "<copy exactly>"},
+  "context": "<copy exactly>",
+  "facts": [<copy the supplied facts exactly>],
+  "dialogue_plan": [
+    {"turn_id": "T1", "operation": "retrieve|coreference|ellipsis|compare|multi_hop|causal|temporal|update|synthesis", "target_fact_ids": ["F1"], "depends_on_turns": [], "requires_history": false}
+  ],
+  "conversation": [
+    {"turn_id": "T1", "question": "...", "answer": "...", "operation": "retrieve", "required_facts": ["F1"], "depends_on_turns": [], "requires_history": false, "evidence": ["verbatim context span"]}
+  ]
+}
+
+The supplied metadata and facts are below. Copy them exactly in the output.
+Context ID: {{CONTEXT_ID}}
+Source JSON: {{SOURCE_JSON}}
+Facts JSON: {{FACTS_JSON}}
+Context:
+{{CONTEXT}}

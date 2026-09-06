@@ -1,0 +1,12 @@
+dataset,total_contexts,total_qa,split_counts,notes
+coqa,7070,116630,"train=6605/108647; validation=499/7983","multi-turn QA; story context reused across turns"
+drop,6108,86935,"train=5541/77400; validation=579/9535","discrete reasoning; numeric/counting answers"
+duorc,14240,187213,"selfrc_train=4799/60721; selfrc_dev=983/12961; selfrc_test=1011/12559; paraphraserc_train=5133/69524; paraphraserc_dev=1133/15591; paraphraserc_test=1207/15857","16547 no_answer; SelfRC and ParaphraseRC are different settings"
+ms_marco,410733,419741,"train=191708/197859; validation=110642/111140; test=110707/110742","v1.1/v2.1 merged; 3910 cross-version contexts and 8341 QA; 103819 empty answers"
+narrativeqa,1572,46765,"train=1102/32747; validation=115/3461; test=355/10557","very long story/summary contexts; split by story"
+pwc,17606,259710,"train=16382/241564; test=1224/18146","instructional context-to-text; answers generally abstractive"
+qasper,1585,5049,"train=888/2593; validation=281/1005; test=416/1451","paper QA; evidence field on all QA; 410 empty answers"
+quac,7843,90922,"train=6843/83568; validation=1000/7354","multi-turn information-seeking QA"
+race,2707,14122,"train=2436/12702; dev=136/712; test=135/708","four-option multiple choice"
+scidqa,727,3252,"train=727/2937; multidoc=191/315","multidoc is a train subset; evidence field"
+squad,21097,240361,"train-v1.1=18891/87599; validation-v1.1=2067/10570; train-v2.0=19029/130319; validation-v2.0=1204/11873","v1.1/v2.0 context reuse; 49443 empty answers in v2"

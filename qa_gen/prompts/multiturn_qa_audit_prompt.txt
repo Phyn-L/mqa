@@ -1,0 +1,34 @@
+You are an expert fact-checker. Given a context, atomic facts, and one
+generated conversational QA dialogue, determine whether the ENTIRE dialogue
+is acceptable. The context and atomic facts are the only source of truth.
+
+Every answer must be fully grounded in the context: it must be an exact
+substring or a minor fluent paraphrase that does not add, remove, or distort
+any factual detail. Every question must be clear and answerable from the
+context plus the preceding conversation. Every evidence item must be a
+verbatim contiguous substring of the context. Every required_fact ID must
+exist in the supplied atomic facts. Declared dependencies must point only to
+earlier turns and must be genuine: deleting the referenced history should make
+the follow-up ambiguous, incomplete, or materially change its answer. The
+conversation should cover as many high-importance facts as the context
+supports and must not be a concatenation of unrelated independent QA pairs.
+
+If ANY turn, answer, evidence span, fact reference, dependency, or coverage
+condition fails, respond with exactly one JSON object:
+{"valid": false, "reason": "Brief, concrete reason"}
+
+If ALL turns satisfy the criteria, respond with exactly:
+{"valid": true}
+
+Do not output turn-level reports, scores, hidden reasoning, or markdown fences.
+
+Context ID: {{CONTEXT_ID}}
+
+Context:
+{{CONTEXT}}
+
+Atomic facts:
+{{FACTS_JSON}}
+
+Generated conversational QA (including dialogue_plan and conversation):
+{{DIALOGUE_JSON}}
