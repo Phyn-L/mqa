@@ -50,7 +50,7 @@ def run(args: argparse.Namespace) -> Path:
     for index, record in tqdm(
         enumerate(spacy_records),
         total=len(spacy_records),
-        desc="Generating spaCy candidates references",
+        desc="collecting spaCy records",
     ):
         key = context_id(record, index)
         if key not in contexts:
@@ -88,12 +88,16 @@ def run(args: argparse.Namespace) -> Path:
         sortish_window_size=args.sortish_window_size,
         sortish_seed=args.sortish_seed,
         token_budget=args.token_budget,
-        progress_desc="LLM reorganization",
+        progress_desc="LLM reorganization spaCy candidates",
     )
 
     accepted: list[dict[str, Any]] = []
     skipped = 0
-    for key, text, seed, prompt, raw in zip(ids, texts, seeds, prompts, raw_outputs):
+    for key, text, seed, prompt, raw in tqdm(
+        zip(ids, texts, seeds, prompts, raw_outputs),
+        total=len(texts),
+        desc="generating compact spaCy result",
+    ):
         parsed, parse_error = parse_json_object(raw)
         errors, _ = (
             ([parse_error], {})

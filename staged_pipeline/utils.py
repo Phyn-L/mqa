@@ -150,14 +150,11 @@ class ModelRunner:
 
         batch_iterator: Iterable[list[int]] = batches
         if progress_desc is not None:
-            try:
-                from tqdm.auto import tqdm
-
-                batch_iterator = tqdm(
-                    batches, total=len(batches), desc=progress_desc, unit="batch"
-                )
-            except ImportError:
-                pass
+            from tqdm.auto import tqdm
+            batch_iterator = tqdm(
+                batches, total=len(batches), desc=progress_desc, unit="batch"
+            )
+  
 
         outputs: list[str | None] = [None] * len(prompts)
         for batch_indices in batch_iterator:
