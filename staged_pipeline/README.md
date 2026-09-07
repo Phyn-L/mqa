@@ -36,7 +36,7 @@ conda run -n shine python qa_gen/staged_pipeline/compare_spacy_models.py \
 该阶段不加载 LLM，只批量运行 spaCy 和规则，直到所有 context 处理完成后写出 `spacy_candidates.jsonl`：
 
 ```bash
-conda run -n shine python qa_gen/staged_pipeline/extract_spacy_candidates.py \
+conda run -n shine python qa_gen/staged_pipeline/spacy_extract_candidates.py \
   --input /path/to/contexts.jsonl \
   --output-dir /path/to/output/spacy_candidates \
   --spacy-model en_core_web_sm \
@@ -51,7 +51,7 @@ conda run -n shine python qa_gen/staged_pipeline/extract_spacy_candidates.py \
 该阶段只读取原始 contexts 与已经完整生成的 `spacy_candidates.jsonl`，不再运行 spaCy：
 
 ```bash
-conda run -n shine python qa_gen/staged_pipeline/reorganize_spacy_candidates.py \
+conda run -n shine python qa_gen/staged_pipeline/spacy_reorganize_candidates.py \
   --contexts /path/to/contexts.jsonl \
   --spacy-candidates /path/to/output/spacy_candidates/spacy_candidates.jsonl \
   --output-dir /path/to/output/candidates \

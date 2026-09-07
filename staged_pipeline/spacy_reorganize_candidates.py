@@ -38,8 +38,10 @@ def index_by_context_id(
 def run(args: argparse.Namespace) -> Path:
     if not 0 <= args.min_coverage <= 1:
         raise ValueError("min_coverage must be in [0, 1]")
-    contexts = index_by_context_id(read_jsonl(args.contexts), "contexts")
-    spacy_records = read_jsonl(args.spacy_candidates, args.max_samples)
+    contexts_path = Path.joinpath(args.contexts_dir,args.dataset, "contexts.jsonl")
+    contexts = index_by_context_id(read_jsonl(contexts_path), "contexts")
+    spacy_candidates_path = Path.joinpath(args.spacy_candidates_dir,args.dataset, "spacy_candidates.jsonl")
+    spacy_records = read_jsonl(spacy_candidates_path, args.max_samples)
     ids: list[str] = []
     texts: list[str] = []
     seeds: list[dict[str, Any]] = []
@@ -102,7 +104,7 @@ def run(args: argparse.Namespace) -> Path:
             continue
         accepted.append({"context_id": key, "candidates": parsed})
 
-    output = args.output_dir / "candidates.jsonl"
+    output = args.output_dir / "processed_candidates.jsonl"
     write_jsonl(output, accepted)
     print(f"written={len(accepted)} skipped={skipped} output={output}")
     return output
@@ -110,17 +112,18 @@ def run(args: argparse.Namespace) -> Path:
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--contexts", type=Path, required=True)
-    parser.add_argument("--spacy-candidates", type=Path, required=True)
-    parser.add_argument("--output-dir", type=Path, required=True)
+    parser.add_argument("--dataset", type=str, required=True)
+    parser.add_argument("--contexts-dir", type=Path, default=Path("/data/lz/contexts/aggregated"))
+    parser.add_argument("--spacy-candidates-dir", type=Path, default=Path("/data/lz/contexts/spacy_candidates"))
+    parser.add_argument("--output-dir", type=Path, default=Path("/data/lz/contexts/spacy_candidates"))
     parser.add_argument("--prompt", type=Path, default=DEFAULT_PROMPT)
     parser.add_argument("--model", default="Qwen/Qwen3.5-9B")
     parser.add_argument("--max-samples", type=int, default=None)
-    parser.add_argument("--batch-size", type=int, default=1)
-    parser.add_argument("--max-new-tokens", type=int, default=4096)
+    parser.add_argument("--batch-size", type=int, default=64)
+    parser.add_argument("--max-new-tokens", type=int, default=8192)
     parser.add_argument("--max-attempts", type=int, default=3)
     parser.add_argument("--min-coverage", type=float, default=1.0)
-    parser.add_argument("--sortish-window-size", type=int, default=2000)
+    parser.add_argument("--sortish-window-size", type=int, default=2048)
     parser.add_argument("--sortish-seed", type=int, default=42)
     parser.add_argument("--token-budget", type=int, default=None)
     parser.add_argument("--device-map", default="auto")
