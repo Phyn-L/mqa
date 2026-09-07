@@ -8,8 +8,8 @@ from typing import Any
 from tqdm.auto import tqdm
 import spacy
 
-from .candidate_utils import extract_parser_candidates
-from .utils import context_id, read_jsonl, write_jsonl
+from spacy_utils import extract_parser_candidates
+from utils import context_id, read_jsonl, write_jsonl
 
 
 def validate_records(records: list[dict[str, Any]]) -> tuple[list[str], list[str]]:

@@ -8,7 +8,7 @@ from pathlib import Path
 from typing import Any
 from tqdm import tqdm
 
-from candidate_utils import compact_parser_candidates, validate_reorganized
+from spacy_utils import compact_parser_candidates, validate_reorganized
 from utils import (
     ModelRunner,
     context_id,

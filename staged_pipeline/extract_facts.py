@@ -8,7 +8,7 @@ from pathlib import Path
 from typing import Any
 
 
-from .utils import (
+from utils import (
     ModelRunner,
     context_id,
     fill_prompt,
