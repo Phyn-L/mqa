@@ -49,18 +49,7 @@ Context token 长度分布（用于生成 batching）
 
 整体分布具有明显长尾：大多数 context 的长度约为 0.7k–1.4k tokens，但 NarrativeQA、SciDQA 和 QASPER 含有大量长文档。NarrativeQA 的 p90 已达到 167,930 tokens，SciDQA 的 p95 为 58,546 tokens；这些样本不能在常见 8k/32k 上下文窗口中直接生成，应先按 story/段落切块或采用滑动窗口。
 
-按原始文件顺序组成 batch 时，padding 开销较大。对全部 context 的估算如下；`token 利用率` 定义为 batch 内真实 token 数除以 padding 后的总 token 数，排序后结果是按长度全局排序的理想上限：
-
-
-| batch size | 原始顺序利用率 | 按 token 长度排序后 | padding 减少 |
-| ---------: | -------------: | ------------------: | -----------: |
-|          2 |          81.4% |              100.0% |        99.8% |
-|          4 |          65.6% |               99.9% |        99.7% |
-|          8 |          53.5% |               99.7% |        99.6% |
-|         16 |          45.2% |               99.3% |        99.4% |
-|         32 |          38.9% |               98.6% |        99.1% |
-
-因此，大规模生成应按 token 长度进行 sortish batching 或分桶，并结合动态 token budget（约束 `batch_size × (输入长度 + max_new_tokens)`）。实际实现不必全局排序：可先随机打乱，再在 1,000–5,000 条样本的窗口内按长度排序，同时保留原始 `id` 以恢复结果顺序。对失败样本 retry 时也应重新按长度分桶。
+按原始文件顺序组成 batch 时，padding 开销较大。大规模生成应按 token 长度进行 sortish batching 或分桶，并结合动态 token budget（约束 `batch_size × (输入长度 + max_new_tokens)`）。实际实现不必全局排序：可先随机打乱，再在 1,000–5,000 条样本的窗口内按长度排序，同时保留原始 `id` 以恢复结果顺序。对失败样本 retry 时也应重新按长度分桶。
 
 ## 重点注意事项
 
@@ -71,7 +60,7 @@ Context token 长度分布（用于生成 batching）
 - QASPER/SciQA：evidence 是重要评估字段。
 - NarrativeQA：context 极长，应按 story 划分。
 
-## 各数据集特点与代表性样例
+各数据集特点与代表性样例
 
 ### coqa
 

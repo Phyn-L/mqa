@@ -44,21 +44,27 @@ run_dataset() {
     local args=(qa_gen/fact_extraction.py --input "$input_path" --prompt qa_gen/prompts/fact_extract_prompt.txt --output-dir "$fact_dir" --model "$MODEL" --batch-size "$BATCH_SIZE" --max-new-tokens "$FACT_MAX_NEW_TOKENS" --retry-max-new-tokens "$FACT_RETRY_MAX_NEW_TOKENS" --max-attempts "$FACT_MAX_ATTEMPTS" --device-map auto --torch-dtype auto)
     [[ -n "$MAX_SAMPLES" ]] && args+=(--max-samples "$MAX_SAMPLES")
     [[ -n "$TOKEN_BUDGET" ]] && args+=(--token-budget "$TOKEN_BUDGET")
-    echo "[$(date -Is)] fact extraction"; run_parallel --script qa_gen/fact_extraction.py --input "$input_path" --output-dir "$fact_dir" ${MAX_SAMPLES:+--max-samples "$MAX_SAMPLES"} -- "${args[@]:4}"
+    local parallel_args=(--script qa_gen/fact_extraction.py --input "$input_path" --output-dir "$fact_dir")
+    [[ -n "$MAX_SAMPLES" ]] && parallel_args+=(--max-samples "$MAX_SAMPLES")
+    echo "[$(date -Is)] fact extraction"; run_parallel "${parallel_args[@]}" -- "${args[@]:1}"
   else echo "[$(date -Is)] skip fact extraction (summary exists)"; fi
 
   if [[ "$FORCE_RERUN" == 1 || ! -f "$qa_dir/summary.json" ]]; then
     local args=(qa_gen/multiturn_qa_generation.py --input "$fact_dir/facts.jsonl" --prompt qa_gen/prompts/multiturn_qa_prompt.txt --output-dir "$qa_dir" --model "$MODEL" --batch-size "$BATCH_SIZE" --max-new-tokens "$QA_MAX_NEW_TOKENS" --device-map auto --torch-dtype auto)
     [[ -n "$MAX_SAMPLES" ]] && args+=(--max-samples "$MAX_SAMPLES")
     [[ -n "$TOKEN_BUDGET" ]] && args+=(--token-budget "$TOKEN_BUDGET")
-    echo "[$(date -Is)] multi-turn QA generation"; run_parallel --script qa_gen/multiturn_qa_generation.py --input "$fact_dir/facts.jsonl" --output-dir "$qa_dir" ${MAX_SAMPLES:+--max-samples "$MAX_SAMPLES"} -- "${args[@]:4}"
+    local parallel_args=(--script qa_gen/multiturn_qa_generation.py --input "$fact_dir/facts.jsonl" --output-dir "$qa_dir")
+    [[ -n "$MAX_SAMPLES" ]] && parallel_args+=(--max-samples "$MAX_SAMPLES")
+    echo "[$(date -Is)] multi-turn QA generation"; run_parallel "${parallel_args[@]}" -- "${args[@]:1}"
   else echo "[$(date -Is)] skip QA generation (summary exists)"; fi
 
   if [[ "$FORCE_RERUN" == 1 || ! -f "$audit_dir/summary.json" ]]; then
     local args=(qa_gen/multiturn_qa_audit.py --input "$qa_dir/qa.jsonl" --prompt qa_gen/prompts/multiturn_qa_audit_prompt.txt --generation-prompt qa_gen/prompts/multiturn_qa_prompt.txt --output-dir "$audit_dir" --model "$MODEL" --batch-size "$BATCH_SIZE" --max-new-tokens "$AUDIT_MAX_NEW_TOKENS" --max-regenerations "$MAX_REGENERATIONS" --device-map auto --torch-dtype auto)
     [[ -n "$MAX_SAMPLES" ]] && args+=(--max-samples "$MAX_SAMPLES")
     [[ -n "$TOKEN_BUDGET" ]] && args+=(--token-budget "$TOKEN_BUDGET")
-    echo "[$(date -Is)] LLM audit and regeneration"; run_parallel --script qa_gen/multiturn_qa_audit.py --input "$qa_dir/qa.jsonl" --output-dir "$audit_dir" ${MAX_SAMPLES:+--max-samples "$MAX_SAMPLES"} -- "${args[@]:4}"
+    local parallel_args=(--script qa_gen/multiturn_qa_audit.py --input "$qa_dir/qa.jsonl" --output-dir "$audit_dir")
+    [[ -n "$MAX_SAMPLES" ]] && parallel_args+=(--max-samples "$MAX_SAMPLES")
+    echo "[$(date -Is)] LLM audit and regeneration"; run_parallel "${parallel_args[@]}" -- "${args[@]:1}"
   else echo "[$(date -Is)] skip audit (summary exists)"; fi
   echo "[$(date -Is)] completed dataset=$dataset"
 }

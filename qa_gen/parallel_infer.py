@@ -35,6 +35,11 @@ def split_contiguous(lines: list[str], workers: int) -> list[list[str]]:
     return shards
 
 
+def _validate_unique_ids(gpus: list[str]) -> None:
+    if len(set(gpus)) != len(gpus):
+        raise ValueError("--gpus must contain unique GPU ids")
+
+
 def _without_control_args(args: list[str]) -> list[str]:
     """Remove parent-owned input/output/max-samples flags from child args."""
     result: list[str] = []
@@ -110,6 +115,7 @@ def run(args: argparse.Namespace, child_args: list[str]) -> None:
     gpus = [gpu.strip() for gpu in args.gpus.split(",") if gpu.strip()]
     if not gpus:
         raise ValueError("--gpus must contain at least one GPU id")
+    _validate_unique_ids(gpus)
     if args.max_samples is not None and args.max_samples < 1:
         raise ValueError("--max-samples must be positive")
     lines = load_lines(args.input, args.max_samples)
@@ -123,6 +129,8 @@ def run(args: argparse.Namespace, child_args: list[str]) -> None:
         temp_root_path = Path(temp_root)
         processes: list[tuple[int, subprocess.Popen[str], Path]] = []
         for worker, (gpu, shard) in enumerate(zip(gpus, shards)):
+            if not shard:
+                continue
             shard_path = temp_root_path / f"input_{worker}.jsonl"
             shard_path.write_text("".join(shard), encoding="utf-8")
             worker_dir = temp_root_path / f"worker_{worker}"
