@@ -1,4 +1,5 @@
 """Stage 1: extract atomic facts and write only facts.jsonl."""
+
 from __future__ import annotations
 
 import argparse
@@ -6,19 +7,19 @@ import json
 from pathlib import Path
 from typing import Any
 
-try:
-    from .utils import (
-        ModelRunner, context_id, fill_prompt, parse_json_object, read_jsonl,
-        write_jsonl,
-    )
-except ImportError:
-    from utils import (
-        ModelRunner, context_id, fill_prompt, parse_json_object, read_jsonl,
-        write_jsonl,
-    )
 
+from .utils import (
+    ModelRunner,
+    context_id,
+    fill_prompt,
+    parse_json_object,
+    read_jsonl,
+    write_jsonl,
+)
 
-DEFAULT_PROMPT = Path(__file__).with_name("prompts") / "fact_extract_with_candidates_prompt.txt"
+DEFAULT_PROMPT = (
+    Path(__file__).with_name("prompts") / "fact_extract_with_candidates_prompt.txt"
+)
 
 
 def index_by_context_id(
@@ -93,19 +94,25 @@ def run(args: argparse.Namespace) -> Path:
         candidates.append(candidate_payload)
     template = args.prompt.read_text(encoding="utf-8")
     prompts = [
-        fill_prompt(template, {
-            "{{CONTEXT}}": text,
-            "{{CANDIDATES_JSON}}": json.dumps(
-                candidate, ensure_ascii=False, separators=(",", ":")
-            ),
-        })
+        fill_prompt(
+            template,
+            {
+                "{{CONTEXT}}": text,
+                "{{CANDIDATES_JSON}}": json.dumps(
+                    candidate, ensure_ascii=False, separators=(",", ":")
+                ),
+            },
+        )
         for text, candidate in zip(texts, candidates)
     ]
     runner = ModelRunner(args.model, args.device_map, args.torch_dtype)
     raw_outputs = runner.generate(
-        prompts, args.batch_size, args.max_new_tokens,
+        prompts,
+        args.batch_size,
+        args.max_new_tokens,
         sortish_window_size=args.sortish_window_size,
-        sortish_seed=args.sortish_seed, token_budget=args.token_budget,
+        sortish_seed=args.sortish_seed,
+        token_budget=args.token_budget,
     )
 
     output_records: list[dict[str, Any]] = []
@@ -116,9 +123,13 @@ def run(args: argparse.Namespace) -> Path:
         attempts = 1
         while errors and attempts < args.max_attempts:
             raw = runner.generate(
-                [prompt], 1, args.max_new_tokens, sample=True,
+                [prompt],
+                1,
+                args.max_new_tokens,
+                sample=True,
                 sortish_window_size=args.sortish_window_size,
-                sortish_seed=args.sortish_seed, token_budget=args.token_budget,
+                sortish_seed=args.sortish_seed,
+                token_budget=args.token_budget,
             )[0]
             parsed, parse_error = parse_json_object(raw)
             errors = [parse_error] if parse_error else validate_facts(parsed, text)

@@ -1,4 +1,5 @@
 """Stage 3: validate QA and write only failed context IDs."""
+
 from __future__ import annotations
 
 import argparse
@@ -6,17 +7,15 @@ import json
 from pathlib import Path
 from typing import Any
 
-try:
-    from .utils import (
-        ModelRunner, context_id, fill_prompt, parse_json_object, read_jsonl,
-        write_jsonl,
-    )
-except ImportError:
-    from utils import (
-        ModelRunner, context_id, fill_prompt, parse_json_object, read_jsonl,
-        write_jsonl,
-    )
 
+from .utils import (
+    ModelRunner,
+    context_id,
+    fill_prompt,
+    parse_json_object,
+    read_jsonl,
+    write_jsonl,
+)
 
 DEFAULT_PROMPT = (
     Path(__file__).resolve().parents[1] / "prompts/multiturn_qa_audit_prompt.txt"
@@ -36,8 +35,10 @@ def index_by_context_id(
 
 
 def merge_record(
-    key: str, context_record: dict[str, Any],
-    fact_record: dict[str, Any] | None, qa_record: dict[str, Any] | None,
+    key: str,
+    context_record: dict[str, Any],
+    fact_record: dict[str, Any] | None,
+    qa_record: dict[str, Any] | None,
 ) -> dict[str, Any] | None:
     if fact_record is None or qa_record is None:
         return None
@@ -46,8 +47,10 @@ def merge_record(
     qa = qa_record.get("qa")
     evidence = qa_record.get("evidence")
     if (
-        not isinstance(context, str) or not isinstance(facts, list)
-        or not isinstance(qa, dict) or not isinstance(evidence, list)
+        not isinstance(context, str)
+        or not isinstance(facts, list)
+        or not isinstance(qa, dict)
+        or not isinstance(evidence, list)
     ):
         return None
     conversation = qa.get("conversation")
@@ -55,7 +58,8 @@ def merge_record(
         return None
     evidence_by_turn = {
         item.get("turn_id"): item.get("spans")
-        for item in evidence if isinstance(item, dict)
+        for item in evidence
+        if isinstance(item, dict)
     }
     enriched: list[dict[str, Any]] = []
     for turn in conversation:
@@ -65,8 +69,11 @@ def merge_record(
         turn["evidence"] = evidence_by_turn.get(turn.get("turn_id"), [])
         enriched.append(turn)
     return {
-        "context_id": key, "context": context, "facts": facts,
-        "dialogue_plan": qa.get("dialogue_plan"), "conversation": enriched,
+        "context_id": key,
+        "context": context,
+        "facts": facts,
+        "dialogue_plan": qa.get("dialogue_plan"),
+        "conversation": enriched,
     }
 
 
@@ -81,7 +88,8 @@ def validate_qa(record: dict[str, Any]) -> list[str]:
     if not isinstance(plan, list) or len(plan) != len(conversation):
         errors.append("dialogue_plan must contain one item per turn")
     fact_ids = {
-        fact["fact_id"] for fact in facts
+        fact["fact_id"]
+        for fact in facts
         if isinstance(fact, dict) and isinstance(fact.get("fact_id"), str)
     }
     previous_turns: set[str] = set()
@@ -128,18 +136,22 @@ def build_audit_prompt(template: str, record: dict[str, Any]) -> str:
         "dialogue_plan": record["dialogue_plan"],
         "conversation": record["conversation"],
     }
-    return fill_prompt(template, {
-        "{{CONTEXT_ID}}": record["context_id"],
-        "{{CONTEXT}}": record["context"],
-        "{{FACTS_JSON}}": json.dumps(record["facts"], ensure_ascii=False),
-        "{{DIALOGUE_JSON}}": json.dumps(dialogue, ensure_ascii=False),
-    })
+    return fill_prompt(
+        template,
+        {
+            "{{CONTEXT_ID}}": record["context_id"],
+            "{{CONTEXT}}": record["context"],
+            "{{FACTS_JSON}}": json.dumps(record["facts"], ensure_ascii=False),
+            "{{DIALOGUE_JSON}}": json.dumps(dialogue, ensure_ascii=False),
+        },
+    )
 
 
 def audit_passed(raw: str) -> bool:
     parsed, parse_error = parse_json_object(raw)
     return bool(
-        not parse_error and isinstance(parsed, dict)
+        not parse_error
+        and isinstance(parsed, dict)
         and not set(parsed) - {"valid", "reason"}
         and parsed.get("valid") is True
     )
@@ -154,9 +166,7 @@ def run(args: argparse.Namespace) -> Path:
     merged: dict[str, dict[str, Any]] = {}
     failed_ids: list[str] = []
     for key, context_record in contexts.items():
-        record = merge_record(
-            key, context_record, facts.get(key), qa.get(key)
-        )
+        record = merge_record(key, context_record, facts.get(key), qa.get(key))
         if record is None or validate_qa(record):
             failed_ids.append(key)
         else:
@@ -168,9 +178,12 @@ def run(args: argparse.Namespace) -> Path:
         prompts = [build_audit_prompt(template, merged[key]) for key in keys]
         runner = ModelRunner(args.model, args.device_map, args.torch_dtype)
         audits = runner.generate(
-            prompts, args.batch_size, args.max_new_tokens,
+            prompts,
+            args.batch_size,
+            args.max_new_tokens,
             sortish_window_size=args.sortish_window_size,
-            sortish_seed=args.sortish_seed, token_budget=args.token_budget,
+            sortish_seed=args.sortish_seed,
+            token_budget=args.token_budget,
         )
         failed_ids.extend(
             key for key, raw in zip(keys, audits) if not audit_passed(raw)

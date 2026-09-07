@@ -1,4 +1,5 @@
 """Stage 2: generate QA and evidence into qa.jsonl."""
+
 from __future__ import annotations
 
 import argparse
@@ -6,17 +7,15 @@ import json
 from pathlib import Path
 from typing import Any
 
-try:
-    from .utils import (
-        ModelRunner, context_id, fill_prompt, parse_json_object, read_jsonl,
-        write_jsonl,
-    )
-except ImportError:
-    from utils import (
-        ModelRunner, context_id, fill_prompt, parse_json_object, read_jsonl,
-        write_jsonl,
-    )
 
+from .utils import (
+    ModelRunner,
+    context_id,
+    fill_prompt,
+    parse_json_object,
+    read_jsonl,
+    write_jsonl,
+)
 
 DEFAULT_PROMPT = Path(__file__).resolve().parents[1] / "prompts/multiturn_qa_prompt.txt"
 
@@ -40,7 +39,11 @@ def normalize_output(
         return None
     plan = parsed.get("dialogue_plan")
     conversation = parsed.get("conversation")
-    if not isinstance(plan, list) or not isinstance(conversation, list) or not conversation:
+    if (
+        not isinstance(plan, list)
+        or not isinstance(conversation, list)
+        or not conversation
+    ):
         return None
     qa_turns: list[dict[str, Any]] = []
     evidence_turns: list[dict[str, Any]] = []
@@ -49,7 +52,9 @@ def normalize_output(
             return None
         qa_turn = dict(turn)
         evidence = qa_turn.pop("evidence", None)
-        if not isinstance(evidence, list) or not all(isinstance(span, str) for span in evidence):
+        if not isinstance(evidence, list) or not all(
+            isinstance(span, str) for span in evidence
+        ):
             return None
         qa_turns.append(qa_turn)
         evidence_turns.append({"turn_id": turn["turn_id"], "spans": evidence})
@@ -72,17 +77,25 @@ def run(args: argparse.Namespace) -> Path:
         context = contexts[key].get("context")
         if not isinstance(context, str):
             raise ValueError(f"context record {key} has no context string")
-        prompts.append(fill_prompt(template, {
-            "{{CONTEXT}}": context,
-            "{{FACTS_JSON}}": json.dumps(facts, ensure_ascii=False),
-        }))
+        prompts.append(
+            fill_prompt(
+                template,
+                {
+                    "{{CONTEXT}}": context,
+                    "{{FACTS_JSON}}": json.dumps(facts, ensure_ascii=False),
+                },
+            )
+        )
         keys.append(key)
 
     runner = ModelRunner(args.model, args.device_map, args.torch_dtype)
     raw_outputs = runner.generate(
-        prompts, args.batch_size, args.max_new_tokens,
+        prompts,
+        args.batch_size,
+        args.max_new_tokens,
         sortish_window_size=args.sortish_window_size,
-        sortish_seed=args.sortish_seed, token_budget=args.token_budget,
+        sortish_seed=args.sortish_seed,
+        token_budget=args.token_budget,
     )
     qa_records: list[dict[str, Any]] = []
     skipped = 0
@@ -93,9 +106,7 @@ def run(args: argparse.Namespace) -> Path:
             skipped += 1
             continue
         qa, evidence = normalized
-        qa_records.append({
-            "context_id": key, "qa": qa, "evidence": evidence
-        })
+        qa_records.append({"context_id": key, "qa": qa, "evidence": evidence})
 
     qa_output = args.output_dir / "qa.jsonl"
     write_jsonl(qa_output, qa_records)

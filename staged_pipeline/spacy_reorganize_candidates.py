@@ -1,26 +1,26 @@
 """Stage 0b: reorganize completed spaCy candidates with an LLM."""
+
 from __future__ import annotations
 
 import argparse
 import json
 from pathlib import Path
 from typing import Any
+from tqdm import tqdm
 
-try:
-    from .candidate_utils import compact_parser_candidates, validate_reorganized
-    from .utils import (
-        ModelRunner, context_id, fill_prompt, parse_json_object, read_jsonl,
-        write_jsonl,
-    )
-except ImportError:
-    from candidate_utils import compact_parser_candidates, validate_reorganized
-    from utils import (
-        ModelRunner, context_id, fill_prompt, parse_json_object, read_jsonl,
-        write_jsonl,
-    )
+from candidate_utils import compact_parser_candidates, validate_reorganized
+from utils import (
+    ModelRunner,
+    context_id,
+    fill_prompt,
+    parse_json_object,
+    read_jsonl,
+    write_jsonl,
+)
 
-
-DEFAULT_PROMPT = Path(__file__).with_name("prompts") / "candidate_reorganization_prompt.txt"
+DEFAULT_PROMPT = (
+    Path(__file__).with_name("prompts") / "candidate_reorganization_prompt.txt"
+)
 
 
 def index_by_context_id(
@@ -38,14 +38,20 @@ def index_by_context_id(
 def run(args: argparse.Namespace) -> Path:
     if not 0 <= args.min_coverage <= 1:
         raise ValueError("min_coverage must be in [0, 1]")
-    contexts_path = Path.joinpath(args.contexts_dir,args.dataset, "contexts.jsonl")
+    contexts_path = Path.joinpath(args.contexts_dir, args.dataset, "contexts.jsonl")
     contexts = index_by_context_id(read_jsonl(contexts_path), "contexts")
-    spacy_candidates_path = Path.joinpath(args.spacy_candidates_dir,args.dataset, "spacy_candidates.jsonl")
+    spacy_candidates_path = Path.joinpath(
+        args.spacy_candidates_dir, args.dataset, "spacy_candidates.jsonl"
+    )
     spacy_records = read_jsonl(spacy_candidates_path, args.max_samples)
     ids: list[str] = []
     texts: list[str] = []
     seeds: list[dict[str, Any]] = []
-    for index, record in enumerate(spacy_records):
+    for index, record in tqdm(
+        enumerate(spacy_records),
+        total=len(spacy_records),
+        desc="Generating spaCy candidates references",
+    ):
         key = context_id(record, index)
         if key not in contexts:
             raise ValueError(f"spaCy candidates references unknown context_id {key}")
@@ -61,20 +67,27 @@ def run(args: argparse.Namespace) -> Path:
 
     template = args.prompt.read_text(encoding="utf-8")
     prompts = [
-        fill_prompt(template, {
-            "{{CONTEXT}}": text,
-            "{{PARSER_CANDIDATES_JSON}}": json.dumps(
-                compact_parser_candidates(candidate), ensure_ascii=False,
-                separators=(",", ":"),
-            ),
-        })
+        fill_prompt(
+            template,
+            {
+                "{{CONTEXT}}": text,
+                "{{PARSER_CANDIDATES_JSON}}": json.dumps(
+                    compact_parser_candidates(candidate),
+                    ensure_ascii=False,
+                    separators=(",", ":"),
+                ),
+            },
+        )
         for text, candidate in zip(texts, seeds)
     ]
     runner = ModelRunner(args.model, args.device_map, args.torch_dtype)
     raw_outputs = runner.generate(
-        prompts, args.batch_size, args.max_new_tokens,
+        prompts,
+        args.batch_size,
+        args.max_new_tokens,
         sortish_window_size=args.sortish_window_size,
-        sortish_seed=args.sortish_seed, token_budget=args.token_budget,
+        sortish_seed=args.sortish_seed,
+        token_budget=args.token_budget,
         progress_desc="LLM reorganization",
     )
 
@@ -83,19 +96,25 @@ def run(args: argparse.Namespace) -> Path:
     for key, text, seed, prompt, raw in zip(ids, texts, seeds, prompts, raw_outputs):
         parsed, parse_error = parse_json_object(raw)
         errors, _ = (
-            ([parse_error], {}) if parse_error
+            ([parse_error], {})
+            if parse_error
             else validate_reorganized(parsed, text, seed, args.min_coverage)
         )
         attempts = 1
         while errors and attempts < args.max_attempts:
             raw = runner.generate(
-                [prompt], 1, args.max_new_tokens, sample=True,
+                [prompt],
+                1,
+                args.max_new_tokens,
+                sample=True,
                 sortish_window_size=args.sortish_window_size,
-                sortish_seed=args.sortish_seed, token_budget=args.token_budget,
+                sortish_seed=args.sortish_seed,
+                token_budget=args.token_budget,
             )[0]
             parsed, parse_error = parse_json_object(raw)
             errors, _ = (
-                ([parse_error], {}) if parse_error
+                ([parse_error], {})
+                if parse_error
                 else validate_reorganized(parsed, text, seed, args.min_coverage)
             )
             attempts += 1
@@ -113,9 +132,17 @@ def run(args: argparse.Namespace) -> Path:
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--dataset", type=str, required=True)
-    parser.add_argument("--contexts-dir", type=Path, default=Path("/data/lz/contexts/aggregated"))
-    parser.add_argument("--spacy-candidates-dir", type=Path, default=Path("/data/lz/contexts/spacy_candidates"))
-    parser.add_argument("--output-dir", type=Path, default=Path("/data/lz/contexts/spacy_candidates"))
+    parser.add_argument(
+        "--contexts-dir", type=Path, default=Path("/data/lz/contexts/aggregated")
+    )
+    parser.add_argument(
+        "--spacy-candidates-dir",
+        type=Path,
+        default=Path("/data/lz/contexts/spacy_candidates"),
+    )
+    parser.add_argument(
+        "--output-dir", type=Path, default=Path("/data/lz/contexts/spacy_candidates")
+    )
     parser.add_argument("--prompt", type=Path, default=DEFAULT_PROMPT)
     parser.add_argument("--model", default="Qwen/Qwen3.5-9B")
     parser.add_argument("--max-samples", type=int, default=None)

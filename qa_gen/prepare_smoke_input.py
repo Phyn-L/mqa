@@ -1,9 +1,9 @@
 """Prepare two distinct SQuAD contexts for the QA-generation smoke test."""
+
 from __future__ import annotations
 
 import json
 from pathlib import Path
-
 
 INPUT = Path("standardized/squad/train-v1.1.jsonl")
 OUTPUT = Path("qa_gen/smoke_20260906/contexts.jsonl")
