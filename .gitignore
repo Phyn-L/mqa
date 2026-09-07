@@ -1,5 +1,6 @@
 *.jsonl
 *.json
+*.tar.gz
 raw/
 standardized/
 aggregated/
