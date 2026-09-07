@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import argparse
+import json
 from pathlib import Path
 from typing import Any
 
@@ -17,7 +18,19 @@ except ImportError:
     )
 
 
-DEFAULT_PROMPT = Path(__file__).resolve().parents[1] / "prompts/fact_extract_prompt.txt"
+DEFAULT_PROMPT = Path(__file__).with_name("prompts") / "fact_extract_with_candidates_prompt.txt"
+
+
+def index_by_context_id(
+    records: list[dict[str, Any]], label: str
+) -> dict[str, dict[str, Any]]:
+    indexed: dict[str, dict[str, Any]] = {}
+    for index, record in enumerate(records):
+        key = context_id(record, index)
+        if key in indexed:
+            raise ValueError(f"{label} contains duplicate context_id {key}")
+        indexed[key] = record
+    return indexed
 
 
 def validate_facts(parsed: dict[str, Any] | None, context: str) -> list[str]:
@@ -60,29 +73,55 @@ def validate_facts(parsed: dict[str, Any] | None, context: str) -> list[str]:
 
 
 def run(args: argparse.Namespace) -> Path:
-    records = read_jsonl(args.input, args.max_samples)
-    ids = [context_id(record, index) for index, record in enumerate(records)]
-    if len(ids) != len(set(ids)):
-        raise ValueError("input contains duplicate context_id values")
-    for index, record in enumerate(records):
-        if not isinstance(record.get("context"), str) or not record["context"].strip():
-            raise ValueError(f"Record {index} has no non-empty context")
-
+    contexts = index_by_context_id(read_jsonl(args.contexts), "contexts")
+    candidate_records = read_jsonl(args.candidates, args.max_samples)
+    ids: list[str] = []
+    texts: list[str] = []
+    candidates: list[dict[str, Any]] = []
+    for index, candidate_record in enumerate(candidate_records):
+        key = context_id(candidate_record, index)
+        if key not in contexts:
+            raise ValueError(f"candidates references unknown context_id {key}")
+        text = contexts[key].get("context")
+        candidate_payload = candidate_record.get("candidates")
+        if not isinstance(text, str) or not text.strip():
+            raise ValueError(f"Context {key} has no non-empty context")
+        if not isinstance(candidate_payload, dict):
+            raise ValueError(f"Candidate record {key} has no candidates object")
+        ids.append(key)
+        texts.append(text)
+        candidates.append(candidate_payload)
     template = args.prompt.read_text(encoding="utf-8")
-    prompts = [fill_prompt(template, {"{{CONTEXT}}": r["context"]}) for r in records]
+    prompts = [
+        fill_prompt(template, {
+            "{{CONTEXT}}": text,
+            "{{CANDIDATES_JSON}}": json.dumps(
+                candidate, ensure_ascii=False, separators=(",", ":")
+            ),
+        })
+        for text, candidate in zip(texts, candidates)
+    ]
     runner = ModelRunner(args.model, args.device_map, args.torch_dtype)
-    raw_outputs = runner.generate(prompts, args.batch_size, args.max_new_tokens)
+    raw_outputs = runner.generate(
+        prompts, args.batch_size, args.max_new_tokens,
+        sortish_window_size=args.sortish_window_size,
+        sortish_seed=args.sortish_seed, token_budget=args.token_budget,
+    )
 
     output_records: list[dict[str, Any]] = []
     skipped = 0
-    for key, record, prompt, raw in zip(ids, records, prompts, raw_outputs):
+    for key, text, prompt, raw in zip(ids, texts, prompts, raw_outputs):
         parsed, parse_error = parse_json_object(raw)
-        errors = [parse_error] if parse_error else validate_facts(parsed, record["context"])
+        errors = [parse_error] if parse_error else validate_facts(parsed, text)
         attempts = 1
         while errors and attempts < args.max_attempts:
-            raw = runner.generate([prompt], 1, args.max_new_tokens, sample=True)[0]
+            raw = runner.generate(
+                [prompt], 1, args.max_new_tokens, sample=True,
+                sortish_window_size=args.sortish_window_size,
+                sortish_seed=args.sortish_seed, token_budget=args.token_budget,
+            )[0]
             parsed, parse_error = parse_json_object(raw)
-            errors = [parse_error] if parse_error else validate_facts(parsed, record["context"])
+            errors = [parse_error] if parse_error else validate_facts(parsed, text)
             attempts += 1
         if errors:
             skipped += 1
@@ -97,7 +136,8 @@ def run(args: argparse.Namespace) -> Path:
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--input", type=Path, required=True)
+    parser.add_argument("--contexts", type=Path, required=True)
+    parser.add_argument("--candidates", type=Path, required=True)
     parser.add_argument("--output-dir", type=Path, required=True)
     parser.add_argument("--prompt", type=Path, default=DEFAULT_PROMPT)
     parser.add_argument("--model", default="Qwen/Qwen3.5-9B")
@@ -105,6 +145,9 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--batch-size", type=int, default=1)
     parser.add_argument("--max-new-tokens", type=int, default=32768)
     parser.add_argument("--max-attempts", type=int, default=3)
+    parser.add_argument("--sortish-window-size", type=int, default=2000)
+    parser.add_argument("--sortish-seed", type=int, default=42)
+    parser.add_argument("--token-budget", type=int, default=None)
     parser.add_argument("--device-map", default="auto")
     parser.add_argument("--torch-dtype", default="auto")
     return parser.parse_args()

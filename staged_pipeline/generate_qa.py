@@ -79,7 +79,11 @@ def run(args: argparse.Namespace) -> Path:
         keys.append(key)
 
     runner = ModelRunner(args.model, args.device_map, args.torch_dtype)
-    raw_outputs = runner.generate(prompts, args.batch_size, args.max_new_tokens)
+    raw_outputs = runner.generate(
+        prompts, args.batch_size, args.max_new_tokens,
+        sortish_window_size=args.sortish_window_size,
+        sortish_seed=args.sortish_seed, token_budget=args.token_budget,
+    )
     qa_records: list[dict[str, Any]] = []
     skipped = 0
     for key, raw in zip(keys, raw_outputs):
@@ -109,6 +113,9 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--max-samples", type=int, default=None)
     parser.add_argument("--batch-size", type=int, default=1)
     parser.add_argument("--max-new-tokens", type=int, default=32768)
+    parser.add_argument("--sortish-window-size", type=int, default=2000)
+    parser.add_argument("--sortish-seed", type=int, default=42)
+    parser.add_argument("--token-budget", type=int, default=None)
     parser.add_argument("--device-map", default="auto")
     parser.add_argument("--torch-dtype", default="auto")
     return parser.parse_args()

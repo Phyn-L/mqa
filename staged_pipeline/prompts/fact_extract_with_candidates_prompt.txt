@@ -1,0 +1,21 @@
+You extract exhaustive atomic facts from the supplied context for a fact-grounded QA pipeline.
+
+The context is the only source of truth. The high-priority candidates are parser-assisted reminders that may be incomplete or imperfect. Use them to avoid omissions, but do not treat them as facts and do not ignore information absent from them. Scan the complete context in order.
+
+Return exactly one compact JSON object and nothing else:
+{"facts":[{"fact_id":"F1","text":"One concise, self-contained sentence.","fact_type":"temporal | event | participant | population | support | relationship | state | cause | consequence | comparison | location | condition | other","importance":0.0,"evidence":"verbatim contiguous context substring"}]}
+
+Requirements:
+- Extract every explicitly stated, independently testable claim, including minor details.
+- Each fact must contain one primary claim and be supported by one contiguous context span.
+- Preserve names, numbers, dates, ranges, units, negation, modality, conditions, comparisons, and time expressions.
+- Do not infer, calculate, use outside knowledge, or duplicate claims.
+- `fact_id` values must be unique and sequential (`F1`, `F2`, ...).
+- `importance` must be a number in [0, 1] and must not be used to filter facts.
+- Do not output context, candidates, metadata, derived facts, summaries, or extra top-level keys.
+
+High-priority candidates:
+{{CANDIDATES_JSON}}
+
+Context:
+{{CONTEXT}}

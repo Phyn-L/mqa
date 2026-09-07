@@ -167,7 +167,11 @@ def run(args: argparse.Namespace) -> Path:
         keys = list(merged)
         prompts = [build_audit_prompt(template, merged[key]) for key in keys]
         runner = ModelRunner(args.model, args.device_map, args.torch_dtype)
-        audits = runner.generate(prompts, args.batch_size, args.max_new_tokens)
+        audits = runner.generate(
+            prompts, args.batch_size, args.max_new_tokens,
+            sortish_window_size=args.sortish_window_size,
+            sortish_seed=args.sortish_seed, token_budget=args.token_budget,
+        )
         failed_ids.extend(
             key for key, raw in zip(keys, audits) if not audit_passed(raw)
         )
@@ -190,6 +194,9 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--max-samples", type=int, default=None)
     parser.add_argument("--batch-size", type=int, default=1)
     parser.add_argument("--max-new-tokens", type=int, default=8192)
+    parser.add_argument("--sortish-window-size", type=int, default=2000)
+    parser.add_argument("--sortish-seed", type=int, default=42)
+    parser.add_argument("--token-budget", type=int, default=None)
     parser.add_argument("--device-map", default="auto")
     parser.add_argument("--torch-dtype", default="auto")
     return parser.parse_args()
