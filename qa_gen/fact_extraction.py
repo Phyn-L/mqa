@@ -1,9 +1,3 @@
-"""Generate atomic facts from context passages with a causal language model.
-
-The script reads JSONL records containing a ``context`` field, prompts Qwen,
-validates evidence spans, and writes one JSONL record per input.
-"""
-
 from __future__ import annotations
 
 import argparse
@@ -13,56 +7,39 @@ from typing import Any, Sequence
 
 import torch
 from transformers import AutoModelForMultimodalLM, AutoProcessor
-try:
-    from tqdm.auto import tqdm
-except ImportError:  # pragma: no cover - keeps the script usable without tqdm
-    def tqdm(iterable, **kwargs):
-        return iterable
+from tqdm.auto import tqdm
 
-try:
-    from .utils import (
-        PromptItem, configure_generation_padding, decode_generated_tokens,
-        load_dataset_records, parse_json_object, read_jsonl, sortish_batches,
-    )
-except ImportError:
-    from utils import (
-        PromptItem, configure_generation_padding, decode_generated_tokens,
-        load_dataset_records, parse_json_object, read_jsonl, sortish_batches,
-    )
+
+from .utils import (
+    PromptItem, configure_generation_padding, decode_generated_tokens,
+    load_dataset_records, parse_json_object, read_jsonl, sortish_batches,
+)
+
 
 DEFAULT_PROMPT = Path(__file__).with_name("prompts") / "fact_extract_prompt.txt"
 DEFAULT_INPUT = Path(__file__).parent.parent / "standardized" / "squad" / "train-v1.1.jsonl"
-DEFAULT_OUTPUT_DIR = Path(__file__).with_name("generated_fact_extraction_small")
+DEFAULT_OUTPUT_DIR = Path(__file__).with_name("atomic_fact")
 
 # Prompt construction.
 
-def build_prompt(
-    template: str, context: str, metadata: dict[str, Any] | None = None
-) -> str:
+def build_prompt(template: str, context: str) -> str:
     if "{{CONTEXT}}" not in template:
         raise ValueError("Prompt template must contain {{CONTEXT}} placeholder")
-    if metadata is None:
-        payload = context
-    else:
-        payload = (
-            "Input metadata (copy these values exactly):\n"
-            + json.dumps(metadata, ensure_ascii=False)
-            + "\n\nContext text begins below.\n"
-            + context
-        )
-    return template.replace("{{CONTEXT}}", payload, 1)
+    return template.replace("{{CONTEXT}}", context, 1)
 
 
 # Output validation.
 
 def validate_output(parsed: dict[str, Any] | None, context: str) -> list[str]:
     """Validate model JSON and every fact against the original context.
-
     Facts and evidence are checked before a record is accepted.
     """
     errors: list[str] = []
     if parsed is None:
         return ["missing parsed object"]
+    extra_keys = set(parsed) - {"facts"}
+    if extra_keys:
+        errors.append(f"unexpected top-level keys: {sorted(extra_keys)}")
     facts = parsed.get("facts")
     if not isinstance(facts, list):
         return ["facts must be a list"]
@@ -122,25 +99,9 @@ def build_prompt_items(
     Token lengths are computed with the same processor used for generation so
     sortish batching accounts for the prompt wrapper and special tokens.
     """
-    prompts = [
-        build_prompt(
-            template,
-            record["context"],
-            {
-                "context_id": record.get("context_id", record.get("id")),
-                "source": (
-                    {key: value for key, value in source_metadata(record, input_path).items() if key in ("dataset", "split")}
-                    if input_path is not None
-                    else {
-                        key: record[key]
-                        for key in ("dataset", "split", "source_dataset", "source_split")
-                        if isinstance(record.get(key), str)
-                    }
-                ),
-            },
-        )
-        for record in records
-    ]
+    # The model only generates facts.  Provenance and the original context are
+    # copied from the input record by ``canonicalize_output`` after validation.
+    prompts = [build_prompt(template, record["context"]) for record in records]
     messages = [[{"role": "user", "content": prompt}] for prompt in prompts]
     tokenized = processor.apply_chat_template(
         messages,

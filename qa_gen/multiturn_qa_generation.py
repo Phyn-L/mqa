@@ -42,10 +42,8 @@ def load_fact_records(path: Path, max_samples: int | None = None) -> list[dict[s
 
 
 def build_qa_prompt(template: str, record: dict[str, Any]) -> str:
-    """Fill all prompt placeholders using trusted input metadata."""
+    """Fill the QA prompt with trusted facts and context."""
     replacements = {
-        "{{CONTEXT_ID}}": str(record.get("context_id", record.get("id", ""))),
-        "{{SOURCE_JSON}}": json.dumps(record.get("source", {}), ensure_ascii=False),
         "{{FACTS_JSON}}": json.dumps(record["facts"], ensure_ascii=False),
         "{{CONTEXT}}": record["context"],
     }
@@ -87,19 +85,19 @@ def _fact_map(record: dict[str, Any]) -> dict[str, dict[str, Any]]:
     return {str(f.get("fact_id")): f for f in record["facts"] if isinstance(f, dict) and f.get("fact_id")}
 
 
-def validate_dialogue(parsed: dict[str, Any] | None, record: dict[str, Any]) -> list[str]:
+def validate_dialogue(
+    parsed: dict[str, Any] | None,
+    record: dict[str, Any],
+    *,
+    generated_only: bool = False,
+) -> list[str]:
     """Deterministically check schema, provenance, evidence, references, and ordering."""
     if not isinstance(parsed, dict):
         return ["output is not a JSON object"]
     errors: list[str] = []
-    if parsed.get("context_id") != record.get("context_id", record.get("id")):
-        errors.append("context_id does not match input")
-    if parsed.get("context") != record.get("context"):
-        errors.append("context was modified")
-    if parsed.get("source") != record.get("source", {}):
-        errors.append("source metadata was modified")
-    if parsed.get("facts") != record.get("facts"):
-        errors.append("facts were modified")
+    extra_keys = set(parsed) - {"dialogue_plan", "conversation"}
+    if generated_only and extra_keys:
+        errors.append(f"unexpected top-level keys: {sorted(extra_keys)}")
     conversation = parsed.get("conversation")
     plan = parsed.get("dialogue_plan")
     if not isinstance(conversation, list) or not conversation:
@@ -184,7 +182,11 @@ def run(args: argparse.Namespace) -> Path:
     rejected: list[dict[str, Any]] = []
     for item in tqdm(items, desc="Validating QA", unit="record"):
         raw = raw_outputs[item.index]; parsed, parse_error = parse_json_object(raw)
-        errors = [parse_error] if parse_error else validate_dialogue(parsed, item.record)
+        errors = (
+            [parse_error]
+            if parse_error
+            else validate_dialogue(parsed, item.record, generated_only=True)
+        )
         if errors:
             rejected.append({"context_id": item.record.get("context_id"), "errors": errors, "raw_output": raw})
         else:

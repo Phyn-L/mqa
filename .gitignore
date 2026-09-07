@@ -1,0 +1,6 @@
+*.jsonl
+*.json
+raw/
+standardized/
+aggregated/
+

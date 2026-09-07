@@ -21,12 +21,9 @@ Conversation quality requirements:
 - Questions and answers may paraphrase wording, but must preserve every factual detail.
 - Do not output hidden reasoning or a markdown code fence. Output only one valid JSON object.
 
-Required output schema:
+Required output schema (output only these generated fields; the program adds
+context_id, source, context, and facts from the input record):
 {
-  "context_id": "<copy exactly>",
-  "source": {"dataset": "<copy exactly>", "split": "<copy exactly>"},
-  "context": "<copy exactly>",
-  "facts": [<copy the supplied facts exactly>],
   "dialogue_plan": [
     {"turn_id": "T1", "operation": "retrieve|coreference|ellipsis|compare|multi_hop|causal|temporal|update|synthesis", "target_fact_ids": ["F1"], "depends_on_turns": [], "requires_history": false}
   ],
@@ -35,9 +32,7 @@ Required output schema:
   ]
 }
 
-The supplied metadata and facts are below. Copy them exactly in the output.
-Context ID: {{CONTEXT_ID}}
-Source JSON: {{SOURCE_JSON}}
+The supplied facts and context are below. Do not reproduce them in your output.
 Facts JSON: {{FACTS_JSON}}
 Context:
 {{CONTEXT}}

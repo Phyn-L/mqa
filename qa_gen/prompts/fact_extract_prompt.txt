@@ -4,16 +4,11 @@ Return exactly one complete, valid JSON object and nothing else. Do not use mark
 fences, explanations, hidden thinking, or a partial/truncated object. Use compact JSON
 without unnecessary whitespace.
 
-Top-level output schema (use these keys only):
-{"context_id":"ctx-001","source":{"dataset":"qasper","split":"train"},"context":"original context text","facts":[{"fact_id":"F1","text":"One concise, self-contained sentence.","fact_type":"temporal | event | participant | population | support | relationship | state | cause | consequence | comparison | location | condition | other","importance":0.0,"evidence":"verbatim contiguous context substring"}]}
+Top-level output schema (use this key only):
+{"facts":[{"fact_id":"F1","text":"One concise, self-contained sentence.","fact_type":"temporal | event | participant | population | support | relationship | state | cause | consequence | comparison | location | condition | other","importance":0.0,"evidence":"verbatim contiguous context substring"}]}
 
-Metadata rules
-- Copy `context_id`, `source.dataset`, `source.split`, and `context` exactly from
-  the input record metadata/context supplied before the context text. Never invent,
-  normalize, or omit these fields. The output `context` must be the complete original
-  context, not a summary or truncation.
-- If a metadata value is unavailable, use the value shown in the input record; do
-  not guess from outside knowledge.
+The program supplies context ID, source metadata, and the original context after
+generation. Do not output any of those fields.
 
 Atomic-fact policy
 - Scan the context in order, sentence by sentence, including headings, captions,
@@ -37,14 +32,14 @@ Atomic-fact policy
   complete single claim by itself. Prefer the shortest sufficient span.
 - `fact_id` values must be unique and sequential (`F1`, `F2`, ...). `importance`
   must be a JSON number in [0, 1] and only ranks facts; it never filters them.
-- Do not output `atomic_facts`, `derived_from`, derived facts, summaries, or any
-  extra top-level key.
+- Do not output `context_id`, `source`, `context`, `atomic_facts`, `derived_from`,
+  derived facts, summaries, or any extra top-level key.
 
 Before answering, silently verify that every evidence string occurs character-for-
-character in the context, every fact is independently supported, metadata and context
-are copied exactly, IDs are unique, and the complete JSON object is syntactically
-closed. If the context is long, keep wording and JSON formatting compact but continue
-scanning; never stop inside a fact or leave an unterminated array/object.
+character in the context, every fact is independently supported, IDs are unique, and
+the complete JSON object is syntactically closed. If the context is long, keep wording
+and JSON formatting compact but continue scanning; never stop inside a fact or leave an
+unterminated array/object.
 
-Input record metadata and context:
+Input context:
 {{CONTEXT}}
