@@ -42,7 +42,7 @@ Transformers，并确保模型可从本地缓存或模型仓库加载。
 
 ## 快速开始
 
-以下命令均从项目根目录 `/data/lz/mqa` 执行。默认 `--max-samples=2` 只处理两条记录，适合先验证流程；批量运行时请显式设置样本数。
+以下命令均从项目根目录 `/data/lz/mqa` 执行。默认处理全部记录；小规模验证流程时请显式设置 `--max-samples`。
 
 ### 1. 生成 pilot 输入（可选）
 
@@ -143,7 +143,7 @@ python qa_gen/multiturn_qa_audit.py \\
 | `--input` | 输入 JSONL | 各脚本的 `DEFAULT_INPUT` |
 | `--output-dir` | 输出目录 | 各脚本的 `DEFAULT_OUTPUT_DIR` |
 | `--model` | Hugging Face 模型名或本地路径 | `Qwen/Qwen3.5-9B` |
-| `--max-samples` | 最多处理的记录数 | `2` |
+| `--max-samples` | 最多处理的记录数 | 不限制（全量） |
 | `--batch-size` | 推理 batch 大小 | `1` |
 | `--max-new-tokens` | 首轮最大生成长度 | 抽取 `32768`；QA 生成 `32768`；审计 `8192` |
 | `--sortish-window-size` | 局部长度排序窗口 | `2000` |

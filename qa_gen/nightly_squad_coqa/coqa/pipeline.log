@@ -1,0 +1,9 @@
+[2026-09-07T10:45:46+08:00] start dataset=coqa input=aggregated/coqa/train.jsonl
+[2026-09-07T10:45:46+08:00] model=/home/lz/hf_cache/hub/models--Qwen--Qwen3.5-9B/snapshots/c202236235762e1c871ad0ccb60c8ee5ba337b9a gpus=0,1,2,3 max_samples=all
+[2026-09-07T10:45:46+08:00] fact extraction
+[2026-09-07T10:46:54+08:00] start dataset=coqa input=aggregated/coqa/train.jsonl
+[2026-09-07T10:46:54+08:00] model=/home/lz/hf_cache/hub/models--Qwen--Qwen3.5-9B/snapshots/c202236235762e1c871ad0ccb60c8ee5ba337b9a gpus=0,1,2,3 max_samples=all
+[2026-09-07T10:46:54+08:00] fact extraction
+[2026-09-07T10:53:46+08:00] start dataset=coqa input=aggregated/coqa/train.jsonl
+[2026-09-07T10:53:46+08:00] model=/home/lz/hf_cache/hub/models--Qwen--Qwen3.5-9B/snapshots/c202236235762e1c871ad0ccb60c8ee5ba337b9a gpus=0,1,2,3 max_samples=all
+[2026-09-07T10:53:46+08:00] fact extraction

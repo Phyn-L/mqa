@@ -15,7 +15,7 @@ FACT_MAX_ATTEMPTS="${FACT_MAX_ATTEMPTS:-3}"
 QA_MAX_NEW_TOKENS="${QA_MAX_NEW_TOKENS:-32768}"
 AUDIT_MAX_NEW_TOKENS="${AUDIT_MAX_NEW_TOKENS:-8192}"
 MAX_REGENERATIONS="${MAX_REGENERATIONS:-2}"
-TOKEN_BUDGET="${TOKEN_BUDGET:-}"
+TOKEN_BUDGET="${TOKEN_BUDGET:-1048576}"
 FORCE_RERUN="${FORCE_RERUN:-0}"
 
 export CUDA_VISIBLE_DEVICES="$GPU_IDS"
@@ -24,6 +24,11 @@ export HF_HOME="${HF_HOME:-/home/lz/hf_cache}"
 export PYTHONUNBUFFERED=1
 
 run_python() { conda run -n shine python "$@"; }
+run_parallel() {
+  # The launcher shards the input into disjoint contiguous ranges, binds one
+  # child process to each GPU, and merges worker JSONL files in shard order.
+  conda run -n shine python qa_gen/parallel_infer.py --gpus "$GPU_IDS" "$@"
+}
 
 run_dataset() {
   local dataset="$1" input_path="$2"
@@ -39,25 +44,25 @@ run_dataset() {
     local args=(qa_gen/fact_extraction.py --input "$input_path" --prompt qa_gen/prompts/fact_extract_prompt.txt --output-dir "$fact_dir" --model "$MODEL" --batch-size "$BATCH_SIZE" --max-new-tokens "$FACT_MAX_NEW_TOKENS" --retry-max-new-tokens "$FACT_RETRY_MAX_NEW_TOKENS" --max-attempts "$FACT_MAX_ATTEMPTS" --device-map auto --torch-dtype auto)
     [[ -n "$MAX_SAMPLES" ]] && args+=(--max-samples "$MAX_SAMPLES")
     [[ -n "$TOKEN_BUDGET" ]] && args+=(--token-budget "$TOKEN_BUDGET")
-    echo "[$(date -Is)] fact extraction"; run_python "${args[@]}"
+    echo "[$(date -Is)] fact extraction"; run_parallel --script qa_gen/fact_extraction.py --input "$input_path" --output-dir "$fact_dir" ${MAX_SAMPLES:+--max-samples "$MAX_SAMPLES"} -- "${args[@]:4}"
   else echo "[$(date -Is)] skip fact extraction (summary exists)"; fi
 
   if [[ "$FORCE_RERUN" == 1 || ! -f "$qa_dir/summary.json" ]]; then
     local args=(qa_gen/multiturn_qa_generation.py --input "$fact_dir/facts.jsonl" --prompt qa_gen/prompts/multiturn_qa_prompt.txt --output-dir "$qa_dir" --model "$MODEL" --batch-size "$BATCH_SIZE" --max-new-tokens "$QA_MAX_NEW_TOKENS" --device-map auto --torch-dtype auto)
     [[ -n "$MAX_SAMPLES" ]] && args+=(--max-samples "$MAX_SAMPLES")
     [[ -n "$TOKEN_BUDGET" ]] && args+=(--token-budget "$TOKEN_BUDGET")
-    echo "[$(date -Is)] multi-turn QA generation"; run_python "${args[@]}"
+    echo "[$(date -Is)] multi-turn QA generation"; run_parallel --script qa_gen/multiturn_qa_generation.py --input "$fact_dir/facts.jsonl" --output-dir "$qa_dir" ${MAX_SAMPLES:+--max-samples "$MAX_SAMPLES"} -- "${args[@]:4}"
   else echo "[$(date -Is)] skip QA generation (summary exists)"; fi
 
   if [[ "$FORCE_RERUN" == 1 || ! -f "$audit_dir/summary.json" ]]; then
     local args=(qa_gen/multiturn_qa_audit.py --input "$qa_dir/qa.jsonl" --prompt qa_gen/prompts/multiturn_qa_audit_prompt.txt --generation-prompt qa_gen/prompts/multiturn_qa_prompt.txt --output-dir "$audit_dir" --model "$MODEL" --batch-size "$BATCH_SIZE" --max-new-tokens "$AUDIT_MAX_NEW_TOKENS" --max-regenerations "$MAX_REGENERATIONS" --device-map auto --torch-dtype auto)
     [[ -n "$MAX_SAMPLES" ]] && args+=(--max-samples "$MAX_SAMPLES")
     [[ -n "$TOKEN_BUDGET" ]] && args+=(--token-budget "$TOKEN_BUDGET")
-    echo "[$(date -Is)] LLM audit and regeneration"; run_python "${args[@]}"
+    echo "[$(date -Is)] LLM audit and regeneration"; run_parallel --script qa_gen/multiturn_qa_audit.py --input "$qa_dir/qa.jsonl" --output-dir "$audit_dir" ${MAX_SAMPLES:+--max-samples "$MAX_SAMPLES"} -- "${args[@]:4}"
   else echo "[$(date -Is)] skip audit (summary exists)"; fi
   echo "[$(date -Is)] completed dataset=$dataset"
 }
 
-(run_dataset squad aggregated/squad/train.jsonl)
-(run_dataset coqa aggregated/coqa/train.jsonl)
+run_dataset squad aggregated/squad/train.jsonl
+run_dataset coqa aggregated/coqa/train.jsonl
 echo "[$(date -Is)] all datasets completed; outputs=$OUTPUT_ROOT"

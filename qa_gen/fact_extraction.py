@@ -370,7 +370,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--prompt", type=Path, default=DEFAULT_PROMPT)
     parser.add_argument("--output-dir", type=Path, default=DEFAULT_OUTPUT_DIR)
     parser.add_argument("--model", default="Qwen/Qwen3.5-9B")
-    parser.add_argument("--max-samples", type=int, default=2)
+    parser.add_argument("--max-samples", type=int, default=None)
     parser.add_argument("--batch-size", type=int, default=1)
     parser.add_argument(
         "--max-new-tokens",

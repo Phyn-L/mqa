@@ -204,7 +204,7 @@ def parse_args() -> argparse.Namespace:
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument("--input", type=Path, default=DEFAULT_INPUT); p.add_argument("--prompt", type=Path, default=DEFAULT_PROMPT)
     p.add_argument("--output-dir", type=Path, default=DEFAULT_OUTPUT_DIR); p.add_argument("--model", default="Qwen/Qwen3.5-9B")
-    p.add_argument("--max-samples", type=int, default=2); p.add_argument("--batch-size", type=int, default=1)
+    p.add_argument("--max-samples", type=int, default=None); p.add_argument("--batch-size", type=int, default=1)
     p.add_argument("--max-new-tokens", type=int, default=32768); p.add_argument("--sortish-window-size", type=int, default=2000); p.add_argument("--sortish-seed", type=int, default=42)
     p.add_argument("--token-budget", type=int, default=None); p.add_argument("--device-map", default="auto"); p.add_argument("--torch-dtype", default="auto")
     return p.parse_args()

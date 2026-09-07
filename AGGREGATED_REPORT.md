@@ -11,51 +11,54 @@
 
 ## 总览
 
-| 数据集 | context | QA | 唯一 context tokens | QA 展开 tokens | 平均 tokens/context | split（context / QA） |
-|---|---:|---:|---:|---:|---:|---|
-| coqa | 7,070 | 116,630 | 2.51M | 41.47M | 355 | train: 6,605 / 108,647; validation: 499 / 7,983 |
-| drop | 6,108 | 86,935 | 1.88M | 25.60M | 308 | train: 5,541 / 77,400; validation: 579 / 9,535 |
-| duorc | 14,240 | 187,213 | 14.63M | 227.87M | 1,028 | paraphraserc_dev: 1,133 / 15,591; paraphraserc_test: 1,207 / 15,857; paraphraserc_train: 5,133 / 69,524; selfrc_dev: 983 / 12,961; selfrc_test: 1,011 / 12,559; selfrc_train: 4,799 / 60,721 |
-| ms_marco | 410,733 | 419,741 | 101.70M | 102.39M | 248 | test: 110,707 / 110,742; train: 191,708 / 197,859; validation: 110,642 / 111,140 |
-| narrativeqa | 1,572 | 46,765 | 115.92M | 3442.37M | 73,739 | test: 355 / 10,557; train: 1,102 / 32,747; validation: 115 / 3,461 |
-| pwc | 17,606 | 259,710 | 8.41M | 124.08M | 478 | test: 1,224 / 18,146; train: 16,382 / 241,564 |
-| qasper | 1,585 | 5,049 | 8.39M | 26.53M | 5,296 | test: 416 / 1,451; train: 888 / 2,593; validation: 281 / 1,005 |
-| quac | 7,843 | 90,922 | 4.48M | 50.39M | 572 | train: 6,843 / 83,568; validation: 1,000 / 7,354 |
-| race | 2,707 | 14,122 | 1.24M | 6.99M | 457 | dev: 136 / 712; test: 135 / 708; train: 2,436 / 12,702 |
-| scidqa | 727 | 3,252 | 17.60M | 82.80M | 24,215 | multidoc: 191 / 315; train: 727 / 2,937 |
-| squad | 21,097 | 240,361 | 3.37M | 39.36M | 160 | train-v1.1: 18,891 / 87,599; train-v2.0: 19,029 / 130,319; validation-v1.1: 2,067 / 10,570; validation-v2.0: 1,204 / 11,873 |
-| **合计** | **491,288** | **1,470,700** | **约 280.14M** | **约 4.17B** | — | — |
 
-## Context token 长度分布（用于生成 batching）
+| 数据集      |     context |            QA | 唯一 context tokens | QA 展开 tokens | 平均 tokens/context | split（context / QA）                                                                                                                                                                        |
+| ----------- | ----------: | ------------: | ------------------: | -------------: | ------------------: | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| coqa        |       7,070 |       116,630 |               2.51M |         41.47M |                 355 | train: 6,605 / 108,647; validation: 499 / 7,983                                                                                                                                              |
+| drop        |       6,108 |        86,935 |               1.88M |         25.60M |                 308 | train: 5,541 / 77,400; validation: 579 / 9,535                                                                                                                                               |
+| duorc       |      14,240 |       187,213 |              14.63M |        227.87M |               1,028 | paraphraserc_dev: 1,133 / 15,591; paraphraserc_test: 1,207 / 15,857; paraphraserc_train: 5,133 / 69,524; selfrc_dev: 983 / 12,961; selfrc_test: 1,011 / 12,559; selfrc_train: 4,799 / 60,721 |
+| ms_marco    |     410,733 |       419,741 |             101.70M |        102.39M |                 248 | test: 110,707 / 110,742; train: 191,708 / 197,859; validation: 110,642 / 111,140                                                                                                             |
+| narrativeqa |       1,572 |        46,765 |             115.92M |       3442.37M |              73,739 | test: 355 / 10,557; train: 1,102 / 32,747; validation: 115 / 3,461                                                                                                                           |
+| pwc         |      17,606 |       259,710 |               8.41M |        124.08M |                 478 | test: 1,224 / 18,146; train: 16,382 / 241,564                                                                                                                                                |
+| qasper      |       1,585 |         5,049 |               8.39M |         26.53M |               5,296 | test: 416 / 1,451; train: 888 / 2,593; validation: 281 / 1,005                                                                                                                               |
+| quac        |       7,843 |        90,922 |               4.48M |         50.39M |                 572 | train: 6,843 / 83,568; validation: 1,000 / 7,354                                                                                                                                             |
+| race        |       2,707 |        14,122 |               1.24M |          6.99M |                 457 | dev: 136 / 712; test: 135 / 708; train: 2,436 / 12,702                                                                                                                                       |
+| scidqa      |         727 |         3,252 |              17.60M |         82.80M |              24,215 | multidoc: 191 / 315; train: 727 / 2,937                                                                                                                                                      |
+| squad       |      21,097 |       240,361 |               3.37M |         39.36M |                 160 | train-v1.1: 18,891 / 87,599; train-v2.0: 19,029 / 130,319; validation-v1.1: 2,067 / 10,570; validation-v2.0: 1,204 / 11,873                                                                  |
+| **合计**    | **491,288** | **1,470,700** |      **约 280.14M** |   **约 4.17B** |                  — | —                                                                                                                                                                                           |
+
+Context token 长度分布（用于生成 batching）
 
 以下统计针对 `aggregated/*/contexts.jsonl` 中的 491,288 条 context，使用本地 Qwen3.5-9B tokenizer，并将 `qa_gen/fact_extract_prompt.txt` 中的固定提示词计入输入长度。p50、p90、p95 分别表示第 50、90、95 百分位；最大值用于识别长尾样本。
 
-| 数据集 | context 数 | p50 tokens | p90 tokens | p95 tokens | 最大 tokens |
-|---|---:|---:|---:|---:|---:|
-| coqa | 7,070 | 923 | 1,004 | 1,038 | 1,891 |
-| drop | 6,108 | 840 | 1,026 | 1,158 | 2,870 |
-| duorc | 14,240 | 1,385 | 2,525 | 3,330 | 16,041 |
-| ms_marco | 410,733 | 670 | 1,280 | 1,360 | 3,035 |
-| narrativeqa | 1,572 | 45,445 | 167,930 | 239,319 | 506,738 |
-| pwc | 17,606 | 1,044 | 1,136 | 1,152 | 1,487 |
-| qasper | 1,585 | 5,518 | 8,569 | 10,197 | 36,469 |
-| quac | 7,843 | 1,086 | 1,290 | 1,380 | 2,982 |
-| race | 2,707 | 996 | 1,255 | 1,399 | 2,040 |
-| scidqa | 727 | 19,493 | 45,634 | 58,546 | 119,051 |
-| squad | 21,097 | 716 | 816 | 857 | 1,546 |
-| **全部混合** | **491,288** | **688** | **1,296** | **1,423** | **506,738** |
+
+| 数据集       |  context 数 | p50 tokens | p90 tokens | p95 tokens | 最大 tokens |
+| ------------ | ----------: | ---------: | ---------: | ---------: | ----------: |
+| coqa         |       7,070 |        923 |      1,004 |      1,038 |       1,891 |
+| drop         |       6,108 |        840 |      1,026 |      1,158 |       2,870 |
+| duorc        |      14,240 |      1,385 |      2,525 |      3,330 |      16,041 |
+| ms_marco     |     410,733 |        670 |      1,280 |      1,360 |       3,035 |
+| narrativeqa  |       1,572 |     45,445 |    167,930 |    239,319 |     506,738 |
+| pwc          |      17,606 |      1,044 |      1,136 |      1,152 |       1,487 |
+| qasper       |       1,585 |      5,518 |      8,569 |     10,197 |      36,469 |
+| quac         |       7,843 |      1,086 |      1,290 |      1,380 |       2,982 |
+| race         |       2,707 |        996 |      1,255 |      1,399 |       2,040 |
+| scidqa       |         727 |     19,493 |     45,634 |     58,546 |     119,051 |
+| squad        |      21,097 |        716 |        816 |        857 |       1,546 |
+| **全部混合** | **491,288** |    **688** |  **1,296** |  **1,423** | **506,738** |
 
 整体分布具有明显长尾：大多数 context 的长度约为 0.7k–1.4k tokens，但 NarrativeQA、SciDQA 和 QASPER 含有大量长文档。NarrativeQA 的 p90 已达到 167,930 tokens，SciDQA 的 p95 为 58,546 tokens；这些样本不能在常见 8k/32k 上下文窗口中直接生成，应先按 story/段落切块或采用滑动窗口。
 
 按原始文件顺序组成 batch 时，padding 开销较大。对全部 context 的估算如下；`token 利用率` 定义为 batch 内真实 token 数除以 padding 后的总 token 数，排序后结果是按长度全局排序的理想上限：
 
+
 | batch size | 原始顺序利用率 | 按 token 长度排序后 | padding 减少 |
-|---:|---:|---:|---:|
-| 2 | 81.4% | 100.0% | 99.8% |
-| 4 | 65.6% | 99.9% | 99.7% |
-| 8 | 53.5% | 99.7% | 99.6% |
-| 16 | 45.2% | 99.3% | 99.4% |
-| 32 | 38.9% | 98.6% | 99.1% |
+| ---------: | -------------: | ------------------: | -----------: |
+|          2 |          81.4% |              100.0% |        99.8% |
+|          4 |          65.6% |               99.9% |        99.7% |
+|          8 |          53.5% |               99.7% |        99.6% |
+|         16 |          45.2% |               99.3% |        99.4% |
+|         32 |          38.9% |               98.6% |        99.1% |
 
 因此，大规模生成应按 token 长度进行 sortish batching 或分桶，并结合动态 token budget（约束 `batch_size × (输入长度 + max_new_tokens)`）。实际实现不必全局排序：可先随机打乱，再在 1,000–5,000 条样本的窗口内按长度排序，同时保留原始 `id` 以恢复结果顺序。对失败样本 retry 时也应重新按长度分桶。
 
@@ -207,7 +210,7 @@ Answer： He is from Australia.；Australia.
 
 Context（截断）： [Illustration] ANNA KARENINA by Leo Tolstoy Translated by Constance Garnett Contents PART ONE PART TWO PART THREE PART FOUR PART FIVE PART SIX PART SEVEN PART EIGHT PART ONE Chapter 1 Happy families are all alike; every unhappy family is unhappy in its own way. Everything was in confusion in the Oblonskys’ house. The wife had discovered that the husband was carrying on an intrigue with a French girl, who had been a governess in their family, and she had announced to her husband that she could not go on living in the same house with him. This position of affairs had now lasted three days, and n…
 
-Question： Who does Couny Vronsky have an affair with? 
+Question： Who does Couny Vronsky have an affair with?
 Answer： Anna Karenina；Anna Karenina
 
 ### pwc
@@ -341,7 +344,7 @@ Answer： A: It appears that CIFAR-10 and CIFAR-100 are more complex than the fa
 
 Context（截断）： # Landmark-RxR: Solving Vision-and-Language Navigation with Fine-Grained Alignment Supervision Anonymous Author(s) Affiliation Address email ###### Abstract In Vision-and-Language Navigation (VLN) task, an agent is asked to navigate inside 3D indoor environments following given instructions. Cross-modal alignment is one of the most critical challenges in VLN because the prediction trajectory needs to match the given instruction accurately. In this paper, we address the cross-modal alignment challenge from a fine-grained perspective. Firstly, to alleviate weak cross-modal alignment supervision…
 
-Question： How does the proposed soft and hard focal-oriented reward relate to the fidelity-based reward from Jain et al, 2019?: 
+Question： How does the proposed soft and hard focal-oriented reward relate to the fidelity-based reward from Jain et al, 2019?:
 Answer： A: The proposed soft and hard focal-oriented rewards have no direct relationship with the fidelity-based reward [1]. Because the CLS [1] metric is order-invariant, the authors only choose nDTW [2] as the fidelity metric to design the fidelity-oriented reward (model#16 in Table 3) in this paper.
 [1] Vihan Jain, Gabriel Magalhaes, Alexander Ku, Ashish Vaswani, Eugene Ie, and Jason Baldridge. Stay on the path: Instruction fidelity in vision-and-language navigation. Association for Computational Linguistics, 2019.
 [2] Gabriel Ilharco, Vihan Jain, Alexander Ku, Eugene Ie, and Jason Baldridge. General evaluation for instruction conditioned navigation using dynamic time warping. NeurIPS Visually Grounded Interaction and Language Workshop, 2019.
