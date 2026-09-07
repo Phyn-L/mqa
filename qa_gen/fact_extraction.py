@@ -92,7 +92,6 @@ def build_prompt_items(
     records: Sequence[dict[str, Any]],
     template: str,
     processor: Any,
-    input_path: Path | None = None,
 ) -> list[PromptItem]:
     """Build prompts and measure their chat-template token lengths.
 
@@ -249,7 +248,7 @@ def run(args: argparse.Namespace) -> Path:
     processor = AutoProcessor.from_pretrained(args.model)
     configure_generation_padding(processor)
     template = args.prompt.read_text(encoding="utf-8")
-    prompt_items = build_prompt_items(records, template, processor, args.input)
+    prompt_items = build_prompt_items(records, template, processor)
     batches = sortish_batches(
         prompt_items,
         batch_size=args.batch_size,

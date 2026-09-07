@@ -79,6 +79,8 @@ def audit_record(record: dict[str, Any], raw_audit: str) -> dict[str, Any]:
     llm_errors: list[str] = []
     if parse_error:
         llm_errors.append(parse_error)
+    elif extra_keys := set(parsed) - {"valid", "reason"}:
+        llm_errors.append(f"unexpected audit keys: {sorted(extra_keys)}")
     elif not isinstance(parsed.get("valid"), bool):
         llm_errors.append("audit JSON must contain boolean valid")
     elif parsed.get("valid") is False and (
