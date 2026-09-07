@@ -11,7 +11,7 @@ from typing import Any, Sequence
 import torch
 
 
-def load_dataset_records(path: Path, max_samples: int | None = None) -> list[dict[str, Any]]:
+def read_jsonl(path: Path, max_samples: int | None = None) -> list[dict[str, Any]]:
     """Load JSONL records and validate the minimal context contract."""
     records: list[dict[str, Any]] = []
     with path.open(encoding="utf-8") as handle:
@@ -30,9 +30,6 @@ def load_dataset_records(path: Path, max_samples: int | None = None) -> list[dic
     return records
 
 
-read_jsonl = load_dataset_records
-
-
 def parse_json_object(text: str) -> tuple[dict[str, Any] | None, str | None]:
     """Parse strict JSON, tolerating a markdown fence or surrounding text."""
     candidates = [text.strip()]
@@ -41,7 +38,7 @@ def parse_json_object(text: str) -> tuple[dict[str, Any] | None, str | None]:
         candidates.insert(0, fenced.group(1))
     start, end = text.find("{"), text.rfind("}")
     if start >= 0 and end > start:
-        candidates.append(text[start : end + 1])
+        candidates.append(text[start: end + 1])
     for candidate in candidates:
         try:
             parsed = json.loads(candidate)
@@ -55,7 +52,6 @@ def parse_json_object(text: str) -> tuple[dict[str, Any] | None, str | None]:
 @dataclass(frozen=True)
 class PromptItem:
     """A prompt and its source record, kept together through batching."""
-
     index: int
     record: dict[str, Any]
     prompt: str
@@ -63,8 +59,8 @@ class PromptItem:
 
 
 def sortish_batches(
-    items: Sequence[PromptItem], batch_size: int, window_size: int, seed: int,
-    token_budget: int | None = None, generation_tokens: int = 0,
+        items: Sequence[PromptItem], batch_size: int, window_size: int, seed: int,
+        token_budget: int | None = None, generation_tokens: int = 0,
 ) -> list[list[PromptItem]]:
     """Shuffle, locally sort by length, then pack bounded batches."""
     if batch_size < 1 or window_size < 1:
@@ -73,7 +69,7 @@ def sortish_batches(
     random.Random(seed).shuffle(shuffled)
     ordered: list[PromptItem] = []
     for start in range(0, len(shuffled), window_size):
-        window = shuffled[start : start + window_size]
+        window = shuffled[start: start + window_size]
         ordered.extend(sorted(window, key=lambda item: item.token_length))
     batches: list[list[PromptItem]] = []
     current: list[PromptItem] = []
@@ -81,9 +77,9 @@ def sortish_batches(
     for item in ordered:
         candidate_max = max(current_max, item.token_length)
         exceeds_budget = (
-            token_budget is not None
-            and current
-            and (candidate_max + generation_tokens) * (len(current) + 1) > token_budget
+                token_budget is not None
+                and current
+                and (candidate_max + generation_tokens) * (len(current) + 1) > token_budget
         )
         if current and (len(current) >= batch_size or exceeds_budget):
             batches.append(current)
