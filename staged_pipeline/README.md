@@ -8,8 +8,8 @@
 contexts.jsonl
   -> extract_spacy_candidates.py
   -> spacy_candidates.jsonl
-  -> reorganize_candidates.py
-  -> candidates.jsonl
+  -> spacy_reorganize_candidates.py
+  -> processed_candidates.jsonl
   -> extract_facts.py
   -> facts.jsonl
   -> generate_qa.py
@@ -52,22 +52,38 @@ conda run -n shine python qa_gen/staged_pipeline/spacy_extract_candidates.py \
 
 ```bash
 conda run -n shine python qa_gen/staged_pipeline/spacy_reorganize_candidates.py \
-  --contexts /path/to/contexts.jsonl \
-  --spacy-candidates /path/to/output/spacy_candidates/spacy_candidates.jsonl \
-  --output-dir /path/to/output/candidates \
-  --model /path/to/model \
-  --min-coverage 1.0
+  --dataset squad \
+  --contexts-dir /path/to/aggregated \
+  --spacy-candidates-dir /path/to/spacy_candidates \
+  --output-dir /path/to/output \
+  --model /path/to/model
 ```
 
-该阶段输出唯一文件 `candidates.jsonl`。每条 LLM 结果必须通过 JSON schema、所有 evidence 原文 substring 和逐类别候选覆盖率校验。
-主批量生成按 sortish batching 后的实际 batch 数显示 `LLM reorganization` 进度条；单条失败重试不重复显示进度条。
+该阶段输出 `processed_candidates.jsonl`。每条记录的 `candidates` 是 LLM 直接生成的纯文本 briefing，不再嵌套 JSON schema，也不保存重复的 `evidence` 字段。例如：
+
+```text
+High-priority candidate information:
+Events:
+- ...
+Participants and support:
+- ...
+Quantities and comparisons:
+- ...
+Relations:
+- ...
+Priority sentences:
+- S0: ...
+```
+
+程序拒绝空文本或明显偏离纯文本模板的输出；失败样本会保留 `context_id` 并立即写入 `failed.jsonl`，不执行自动重试。
+主批量生成按 sortish batching 显示实际 batch 进度；写入进度按 context 只统计一次。
 
 ## 1. Atomic fact 抽取
 
 ```bash
 conda run -n shine python qa_gen/staged_pipeline/extract_facts.py \
   --contexts /path/to/contexts.jsonl \
-  --candidates /path/to/output/candidates/candidates.jsonl \
+  --candidates /path/to/output/processed_candidates.jsonl \
   --output-dir /path/to/output/facts \
   --model /path/to/model
 ```

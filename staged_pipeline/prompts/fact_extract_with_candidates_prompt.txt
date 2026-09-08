@@ -15,7 +15,7 @@ Requirements:
 - Do not output context, candidates, metadata, derived facts, summaries, or extra top-level keys.
 
 High-priority candidates:
-{{CANDIDATES_JSON}}
+{{CANDIDATES}}
 
 Context:
 {{CONTEXT}}

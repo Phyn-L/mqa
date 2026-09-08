@@ -78,7 +78,7 @@ def run(args: argparse.Namespace) -> Path:
     candidate_records = read_jsonl(args.candidates, args.max_samples)
     ids: list[str] = []
     texts: list[str] = []
-    candidates: list[dict[str, Any]] = []
+    candidates: list[Any] = []
     for index, candidate_record in enumerate(candidate_records):
         key = context_id(candidate_record, index)
         if key not in contexts:
@@ -87,8 +87,11 @@ def run(args: argparse.Namespace) -> Path:
         candidate_payload = candidate_record.get("candidates")
         if not isinstance(text, str) or not text.strip():
             raise ValueError(f"Context {key} has no non-empty context")
-        if not isinstance(candidate_payload, dict):
-            raise ValueError(f"Candidate record {key} has no candidates object")
+        if not (
+            isinstance(candidate_payload, dict)
+            or (isinstance(candidate_payload, str) and candidate_payload.strip())
+        ):
+            raise ValueError(f"Candidate record {key} has no candidates text/object")
         ids.append(key)
         texts.append(text)
         candidates.append(candidate_payload)
@@ -98,8 +101,10 @@ def run(args: argparse.Namespace) -> Path:
             template,
             {
                 "{{CONTEXT}}": text,
-                "{{CANDIDATES_JSON}}": json.dumps(
-                    candidate, ensure_ascii=False, separators=(",", ":")
+                "{{CANDIDATES}}": (
+                    candidate
+                    if isinstance(candidate, str)
+                    else json.dumps(candidate, ensure_ascii=False, separators=(",", ":"))
                 ),
             },
         )

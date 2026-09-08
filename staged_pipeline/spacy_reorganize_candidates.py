@@ -4,23 +4,29 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 from pathlib import Path
 from typing import Any
 from tqdm import tqdm
 
-from spacy_utils import compact_parser_candidates, validate_reorganized
+from spacy_utils import compact_parser_candidates
 from utils import (
     ModelRunner,
     context_id,
     fill_prompt,
-    parse_json_object,
     read_jsonl,
-    write_jsonl,
 )
 
 DEFAULT_PROMPT = (
     Path(__file__).with_name("prompts") / "candidate_reorganization_prompt.txt"
 )
+SECTION_HEADERS = {
+    "Events:",
+    "Participants and support:",
+    "Quantities and comparisons:",
+    "Relations:",
+    "Priority sentences:",
+}
 
 
 def index_by_context_id(
@@ -35,15 +41,49 @@ def index_by_context_id(
     return indexed
 
 
+def validate_candidate_text(raw: str) -> tuple[str, list[str]]:
+    text = raw.strip()
+    if not text:
+        return text, ["model output is empty"]
+    errors: list[str] = []
+    lines = [line.strip() for line in text.splitlines()]
+    if lines[0] != "High-priority candidate information:":
+        errors.append("missing High-priority candidate information header")
+    if not any(line in SECTION_HEADERS for line in lines):
+        errors.append("missing candidate section")
+    if not any(line.startswith("- ") and len(line) > 2 for line in lines):
+        errors.append("missing candidate bullet")
+    if "```" in text or text.startswith("{"):
+        errors.append("output must be plain text, not JSON or a code fence")
+    return text, errors
+
+
 def run(args: argparse.Namespace) -> Path:
-    if not 0 <= args.min_coverage <= 1:
-        raise ValueError("min_coverage must be in [0, 1]")
-    contexts_path = Path.joinpath(args.contexts_dir, args.dataset, "contexts.jsonl")
+    contexts_path = args.contexts_dir / args.dataset / "contexts.jsonl"
     contexts = index_by_context_id(read_jsonl(contexts_path), "contexts")
-    spacy_candidates_path = Path.joinpath(
-        args.spacy_candidates_dir, args.dataset, "spacy_candidates.jsonl"
+    spacy_candidates_path = (
+        args.spacy_candidates_dir / args.dataset / "spacy_candidates.jsonl"
     )
     spacy_records = read_jsonl(spacy_candidates_path, args.max_samples)
+    output = args.output_dir / args.dataset / "processed_candidates.jsonl"
+    failed_output = args.output_dir / args.dataset / "failed.jsonl"
+
+    # only unprocessed records will pass
+    completed = {}
+    if output.exists():
+        for index, record in enumerate(read_jsonl(output)):
+            key = context_id(record, index)
+            if (
+                isinstance(record.get("candidates"), str)
+                and record["candidates"].strip()
+            ):
+                if key in completed:
+                    raise ValueError(
+                        f"processed candidates contains duplicate context_id {key}"
+                    )
+                completed[key] = record
+    print(f"{len(completed)}/{len(spacy_records)} records has been processed")
+
     ids: list[str] = []
     texts: list[str] = []
     seeds: list[dict[str, Any]] = []
@@ -53,6 +93,8 @@ def run(args: argparse.Namespace) -> Path:
         desc="collecting spaCy records",
     ):
         key = context_id(record, index)
+        if key in completed:
+            continue
         if key not in contexts:
             raise ValueError(f"spaCy candidates references unknown context_id {key}")
         text = contexts[key].get("context")
@@ -80,56 +122,56 @@ def run(args: argparse.Namespace) -> Path:
         )
         for text, candidate in zip(texts, seeds)
     ]
-    runner = ModelRunner(args.model, args.device_map, args.torch_dtype)
-    raw_outputs = runner.generate(
-        prompts,
-        args.batch_size,
-        args.max_new_tokens,
-        sortish_window_size=args.sortish_window_size,
-        sortish_seed=args.sortish_seed,
-        token_budget=args.token_budget,
-        progress_desc="LLM reorganization spaCy candidates",
-    )
-
-    accepted: list[dict[str, Any]] = []
-    skipped = 0
-    for key, text, seed, prompt, raw in tqdm(
-        zip(ids, texts, seeds, prompts, raw_outputs),
-        total=len(texts),
-        desc="generating compact spaCy result",
-    ):
-        parsed, parse_error = parse_json_object(raw)
-        errors, _ = (
-            ([parse_error], {})
-            if parse_error
-            else validate_reorganized(parsed, text, seed, args.min_coverage)
+    written = 0
+    failed_count = 0
+    if prompts:
+        runner = ModelRunner(args.model, args.device_map, args.torch_dtype)
+        output.parent.mkdir(parents=True, exist_ok=True)
+        # ModelRunner performs the global sortish batching: prompts are locally
+        # sorted by token length, packed under the token budget, and restored to
+        # input order before this function receives the outputs.
+        raw_outputs = runner.generate(
+            prompts,
+            args.batch_size,
+            args.max_new_tokens,
+            sortish_window_size=args.sortish_window_size,
+            sortish_seed=args.sortish_seed,
+            token_budget=args.token_budget,
+            progress_desc="LLM reorganization",
         )
-        attempts = 1
-        while errors and attempts < args.max_attempts:
-            raw = runner.generate(
-                [prompt],
-                1,
-                args.max_new_tokens,
-                sample=True,
-                sortish_window_size=args.sortish_window_size,
-                sortish_seed=args.sortish_seed,
-                token_budget=args.token_budget,
-            )[0]
-            parsed, parse_error = parse_json_object(raw)
-            errors, _ = (
-                ([parse_error], {})
-                if parse_error
-                else validate_reorganized(parsed, text, seed, args.min_coverage)
+        with (
+            output.open("a", encoding="utf-8") as handle,
+            failed_output.open("a", encoding="utf-8") as failed_handle,
+        ):
+            progress = tqdm(
+                total=len(prompts), desc="writing candidates", unit="context"
             )
-            attempts += 1
-        if errors:
-            skipped += 1
-            continue
-        accepted.append({"context_id": key, "candidates": parsed})
+            for key, raw in zip(ids, raw_outputs):
+                parsed, errors = validate_candidate_text(raw)
+                if errors:
+                    failed_handle.write(
+                        json.dumps(
+                            {"context_id": key, "errors": errors},
+                            ensure_ascii=False,
+                        )
+                        + "\n"
+                    )
+                    failed_handle.flush()
+                    os.fsync(failed_handle.fileno())
+                    failed_count += 1
+                else:
+                    record = {"context_id": key, "candidates": parsed}
+                    handle.write(json.dumps(record, ensure_ascii=False) + "\n")
+                    handle.flush()
+                    os.fsync(handle.fileno())
+                    written += 1
+                progress.update()
+            progress.close()
 
-    output = args.output_dir / "processed_candidates.jsonl"
-    write_jsonl(output, accepted)
-    print(f"written={len(accepted)} skipped={skipped} output={output}")
+    print(
+        f"existing={len(completed)} written={written} failed={failed_count} "
+        f"output={output} failed_output={failed_output}"
+    )
     return output
 
 
@@ -145,15 +187,14 @@ def parse_args() -> argparse.Namespace:
         default=Path("/data/lz/contexts/spacy_candidates"),
     )
     parser.add_argument(
-        "--output-dir", type=Path, default=Path("/data/lz/contexts/spacy_candidates")
+        "--output-dir", type=Path, default=Path(__file__).resolve().parent
     )
     parser.add_argument("--prompt", type=Path, default=DEFAULT_PROMPT)
     parser.add_argument("--model", default="Qwen/Qwen3.5-9B")
     parser.add_argument("--max-samples", type=int, default=None)
     parser.add_argument("--batch-size", type=int, default=64)
     parser.add_argument("--max-new-tokens", type=int, default=8192)
-    parser.add_argument("--max-attempts", type=int, default=3)
-    parser.add_argument("--min-coverage", type=float, default=1.0)
+    # Kept for CLI compatibility with older launch scripts; text output is not retried.
     parser.add_argument("--sortish-window-size", type=int, default=2048)
     parser.add_argument("--sortish-seed", type=int, default=42)
     parser.add_argument("--token-budget", type=int, default=None)
