@@ -1,4 +1,4 @@
-"""Stage 2: generate QA and evidence into qa.jsonl."""
+"""Stage 2: generate QA and evidence with incremental output."""
 
 from __future__ import annotations
 
@@ -9,12 +9,12 @@ from typing import Any
 
 
 from utils import (
+    IncrementalJsonlWriter,
     ModelRunner,
     context_id,
     fill_prompt,
     parse_json_object,
     read_jsonl,
-    write_jsonl,
 )
 
 DEFAULT_PROMPT = Path(__file__).resolve().parents[1] / "prompts/multiturn_qa_prompt.txt"
@@ -64,11 +64,25 @@ def normalize_output(
 def run(args: argparse.Namespace) -> Path:
     contexts = index_by_context_id(read_jsonl(args.contexts), "contexts")
     fact_records = read_jsonl(args.facts, args.max_samples)
+    qa_output = args.output_dir / "qa.jsonl"
+    failed_output = args.output_dir / "failed.jsonl"
+    completed: dict[str, dict[str, Any]] = {}
+    if qa_output.exists():
+        completed = index_by_context_id(read_jsonl(qa_output), "QA output")
+        for key, record in completed.items():
+            if not isinstance(record.get("qa"), dict) or not isinstance(
+                record.get("evidence"), list
+            ):
+                raise ValueError(f"Existing QA record {key} has invalid qa/evidence")
+    print(f"{len(completed)}/{len(fact_records)} records has been processed")
+
     prompts: list[str] = []
     keys: list[str] = []
     template = args.prompt.read_text(encoding="utf-8")
     for index, fact_record in enumerate(fact_records):
         key = context_id(fact_record, index)
+        if key in completed:
+            continue
         if key not in contexts:
             raise ValueError(f"facts references unknown context_id {key}")
         facts = fact_record.get("facts")
@@ -88,29 +102,38 @@ def run(args: argparse.Namespace) -> Path:
         )
         keys.append(key)
 
-    runner = ModelRunner(args.model, args.device_map, args.torch_dtype)
-    raw_outputs = runner.generate(
-        prompts,
-        args.batch_size,
-        args.max_new_tokens,
-        sortish_window_size=args.sortish_window_size,
-        sortish_seed=args.sortish_seed,
-        token_budget=args.token_budget,
-    )
-    qa_records: list[dict[str, Any]] = []
-    skipped = 0
-    for key, raw in zip(keys, raw_outputs):
-        parsed, _ = parse_json_object(raw)
-        normalized = normalize_output(parsed)
-        if normalized is None:
-            skipped += 1
-            continue
-        qa, evidence = normalized
-        qa_records.append({"context_id": key, "qa": qa, "evidence": evidence})
+    writer = IncrementalJsonlWriter(qa_output, failed_output)
+    with writer:
+        if prompts:
+            runner = ModelRunner(args.model, args.device_map, args.torch_dtype)
 
-    qa_output = args.output_dir / "qa.jsonl"
-    write_jsonl(qa_output, qa_records)
-    print(f"written={len(qa_records)} skipped={skipped} output={qa_output}")
+            def write_result(index: int, raw: str) -> None:
+                key = keys[index]
+                parsed, _ = parse_json_object(raw)
+                normalized = normalize_output(parsed)
+                if normalized is None:
+                    writer.write_failure(key, raw)
+                else:
+                    qa, evidence = normalized
+                    writer.write_success(
+                        {"context_id": key, "qa": qa, "evidence": evidence}
+                    )
+
+            runner.generate(
+                prompts,
+                args.batch_size,
+                args.max_new_tokens,
+                sortish_window_size=args.sortish_window_size,
+                sortish_seed=args.sortish_seed,
+                token_budget=args.token_budget,
+                progress_desc="QA generation",
+                result_callback=write_result,
+            )
+
+    print(
+        f"existing={len(completed)} written={writer.written} failed={writer.failed} "
+        f"output={qa_output} failed_output={failed_output}"
+    )
     return qa_output
 
 

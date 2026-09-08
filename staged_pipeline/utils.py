@@ -2,10 +2,65 @@
 from __future__ import annotations
 
 import json
+import os
 import random
 import re
 from pathlib import Path
-from typing import Any, Iterable
+from typing import Any, Callable, Iterable, TextIO
+
+
+class IncrementalJsonlWriter:
+    """Append successful and failed generation results with durable writes."""
+
+    def __init__(self, output: Path, failed_output: Path) -> None:
+        self.output = output
+        self.failed_output = failed_output
+        self.written = 0
+        self.failed = 0
+        self._handle: TextIO | None = None
+        self._failed_handle: TextIO | None = None
+
+    def __enter__(self) -> IncrementalJsonlWriter:
+        self.output.parent.mkdir(parents=True, exist_ok=True)
+        self.failed_output.parent.mkdir(parents=True, exist_ok=True)
+        self._handle = self.output.open("a", encoding="utf-8")
+        try:
+            self._failed_handle = self.failed_output.open("a", encoding="utf-8")
+        except BaseException:
+            self._handle.close()
+            self._handle = None
+            raise
+        return self
+
+    def __exit__(self, *exc_info: object) -> None:
+        if self._failed_handle is not None:
+            self._failed_handle.close()
+            self._failed_handle = None
+        if self._handle is not None:
+            self._handle.close()
+            self._handle = None
+
+    @staticmethod
+    def _write(handle: TextIO | None, record: dict[str, Any]) -> None:
+        if handle is None:
+            raise RuntimeError(
+                "IncrementalJsonlWriter must be used as a context manager"
+            )
+        handle.write(json.dumps(record, ensure_ascii=False) + "\n")
+        handle.flush()
+        os.fsync(handle.fileno())
+
+    def write_success(self, record: dict[str, Any]) -> None:
+        self._write(self._handle, record)
+        self.written += 1
+
+    def write_failure(self, key: str, raw_output: str) -> None:
+        self._write(
+            self._failed_handle,
+            {"context_id": key, "raw_output": raw_output},
+        )
+        self.failed += 1
+
 
 def read_jsonl(path: Path, max_samples: int | None = None) -> list[dict[str, Any]]:
     records: list[dict[str, Any]] = []
@@ -132,7 +187,9 @@ class ModelRunner:
         sortish_seed: int = 42,
         token_budget: int | None = None,
         progress_desc: str | None = None,
+        result_callback: Callable[[int, str], None] | None = None,
     ) -> list[str]:
+        """Generate all prompts and optionally report each decoded result immediately."""
         if not prompts:
             return []
 
@@ -183,5 +240,8 @@ class ModelRunner:
                 clean_up_tokenization_spaces=False,
             )
             for index, text in zip(batch_indices, decoded):
-                outputs[index] = text.strip()
+                result = text.strip()
+                outputs[index] = result
+                if result_callback is not None:
+                    result_callback(index, result)
         return [text or "" for text in outputs]

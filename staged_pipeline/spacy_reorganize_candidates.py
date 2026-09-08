@@ -4,13 +4,13 @@ from __future__ import annotations
 
 import argparse
 import json
-import os
 from pathlib import Path
 from typing import Any
 from tqdm import tqdm
 
 from spacy_utils import compact_parser_candidates
 from utils import (
+    IncrementalJsonlWriter,
     ModelRunner,
     context_id,
     fill_prompt,
@@ -122,54 +122,35 @@ def run(args: argparse.Namespace) -> Path:
         )
         for text, candidate in zip(texts, seeds)
     ]
-    written = 0
-    failed_count = 0
-    if prompts:
-        runner = ModelRunner(args.model, args.device_map, args.torch_dtype)
-        output.parent.mkdir(parents=True, exist_ok=True)
-        # ModelRunner performs the global sortish batching: prompts are locally
-        # sorted by token length, packed under the token budget, and restored to
-        # input order before this function receives the outputs.
-        raw_outputs = runner.generate(
-            prompts,
-            args.batch_size,
-            args.max_new_tokens,
-            sortish_window_size=args.sortish_window_size,
-            sortish_seed=args.sortish_seed,
-            token_budget=args.token_budget,
-            progress_desc="LLM reorganization",
-        )
-        with (
-            output.open("a", encoding="utf-8") as handle,
-            failed_output.open("a", encoding="utf-8") as failed_handle,
-        ):
-            progress = tqdm(
-                total=len(prompts), desc="writing candidates", unit="context"
-            )
-            for key, raw in zip(ids, raw_outputs):
+    writer = IncrementalJsonlWriter(output, failed_output)
+    with writer:
+        if prompts:
+            runner = ModelRunner(args.model, args.device_map, args.torch_dtype)
+
+            def write_result(index: int, raw: str) -> None:
+                key = ids[index]
                 parsed, errors = validate_candidate_text(raw)
                 if errors:
-                    failed_handle.write(
-                        json.dumps(
-                            {"context_id": key, "errors": errors},
-                            ensure_ascii=False,
-                        )
-                        + "\n"
-                    )
-                    failed_handle.flush()
-                    os.fsync(failed_handle.fileno())
-                    failed_count += 1
+                    writer.write_failure(key, raw)
                 else:
-                    record = {"context_id": key, "candidates": parsed}
-                    handle.write(json.dumps(record, ensure_ascii=False) + "\n")
-                    handle.flush()
-                    os.fsync(handle.fileno())
-                    written += 1
-                progress.update()
-            progress.close()
+                    writer.write_success({"context_id": key, "candidates": parsed})
+
+            # Sortish batching may generate contexts out of input order. The
+            # callback writes each result as soon as its batch finishes, while
+            # context_id keeps the JSONL order-independent and resumable.
+            runner.generate(
+                prompts,
+                args.batch_size,
+                args.max_new_tokens,
+                sortish_window_size=args.sortish_window_size,
+                sortish_seed=args.sortish_seed,
+                token_budget=args.token_budget,
+                progress_desc="LLM reorganization",
+                result_callback=write_result,
+            )
 
     print(
-        f"existing={len(completed)} written={written} failed={failed_count} "
+        f"existing={len(completed)} written={writer.written} failed={writer.failed} "
         f"output={output} failed_output={failed_output}"
     )
     return output
@@ -187,7 +168,9 @@ def parse_args() -> argparse.Namespace:
         default=Path("/data/lz/contexts/spacy_candidates"),
     )
     parser.add_argument(
-        "--output-dir", type=Path, default=Path(__file__).resolve().parent
+        "--output-dir",
+        type=Path,
+        default=Path("/data/lz/contexts/processed_candidates"),
     )
     parser.add_argument("--prompt", type=Path, default=DEFAULT_PROMPT)
     parser.add_argument("--model", default="Qwen/Qwen3.5-9B")

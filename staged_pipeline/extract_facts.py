@@ -1,4 +1,4 @@
-"""Stage 1: extract atomic facts and write only facts.jsonl."""
+"""Stage 1: extract atomic facts with incremental success/failure output."""
 
 from __future__ import annotations
 
@@ -9,12 +9,12 @@ from typing import Any
 
 
 from utils import (
+    IncrementalJsonlWriter,
     ModelRunner,
     context_id,
     fill_prompt,
     parse_json_object,
     read_jsonl,
-    write_jsonl,
 )
 
 DEFAULT_PROMPT = (
@@ -76,11 +76,23 @@ def validate_facts(parsed: dict[str, Any] | None, context: str) -> list[str]:
 def run(args: argparse.Namespace) -> Path:
     contexts = index_by_context_id(read_jsonl(args.contexts), "contexts")
     candidate_records = read_jsonl(args.candidates, args.max_samples)
+    output = args.output_dir / "facts.jsonl"
+    failed_output = args.output_dir / "failed.jsonl"
+    completed: dict[str, dict[str, Any]] = {}
+    if output.exists():
+        completed = index_by_context_id(read_jsonl(output), "facts output")
+        for key, record in completed.items():
+            if not isinstance(record.get("facts"), list):
+                raise ValueError(f"Existing facts record {key} has no facts list")
+    print(f"{len(completed)}/{len(candidate_records)} records has been processed")
+
     ids: list[str] = []
     texts: list[str] = []
     candidates: list[Any] = []
     for index, candidate_record in enumerate(candidate_records):
         key = context_id(candidate_record, index)
+        if key in completed:
+            continue
         if key not in contexts:
             raise ValueError(f"candidates references unknown context_id {key}")
         text = contexts[key].get("context")
@@ -110,43 +122,39 @@ def run(args: argparse.Namespace) -> Path:
         )
         for text, candidate in zip(texts, candidates)
     ]
-    runner = ModelRunner(args.model, args.device_map, args.torch_dtype)
-    raw_outputs = runner.generate(
-        prompts,
-        args.batch_size,
-        args.max_new_tokens,
-        sortish_window_size=args.sortish_window_size,
-        sortish_seed=args.sortish_seed,
-        token_budget=args.token_budget,
-    )
+    writer = IncrementalJsonlWriter(output, failed_output)
+    with writer:
+        if prompts:
+            runner = ModelRunner(args.model, args.device_map, args.torch_dtype)
 
-    output_records: list[dict[str, Any]] = []
-    skipped = 0
-    for key, text, prompt, raw in zip(ids, texts, prompts, raw_outputs):
-        parsed, parse_error = parse_json_object(raw)
-        errors = [parse_error] if parse_error else validate_facts(parsed, text)
-        attempts = 1
-        while errors and attempts < args.max_attempts:
-            raw = runner.generate(
-                [prompt],
-                1,
+            def write_result(index: int, raw: str) -> None:
+                key = ids[index]
+                parsed, parse_error = parse_json_object(raw)
+                errors = [parse_error] if parse_error else validate_facts(
+                    parsed, texts[index]
+                )
+                if errors:
+                    writer.write_failure(key, raw)
+                else:
+                    writer.write_success(
+                        {"context_id": key, "facts": parsed["facts"]}
+                    )
+
+            runner.generate(
+                prompts,
+                args.batch_size,
                 args.max_new_tokens,
-                sample=True,
                 sortish_window_size=args.sortish_window_size,
                 sortish_seed=args.sortish_seed,
                 token_budget=args.token_budget,
-            )[0]
-            parsed, parse_error = parse_json_object(raw)
-            errors = [parse_error] if parse_error else validate_facts(parsed, text)
-            attempts += 1
-        if errors:
-            skipped += 1
-            continue
-        output_records.append({"context_id": key, "facts": parsed["facts"]})
+                progress_desc="fact extraction",
+                result_callback=write_result,
+            )
 
-    output = args.output_dir / "facts.jsonl"
-    write_jsonl(output, output_records)
-    print(f"written={len(output_records)} skipped={skipped} output={output}")
+    print(
+        f"existing={len(completed)} written={writer.written} failed={writer.failed} "
+        f"output={output} failed_output={failed_output}"
+    )
     return output
 
 
@@ -160,7 +168,6 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--max-samples", type=int, default=None)
     parser.add_argument("--batch-size", type=int, default=1)
     parser.add_argument("--max-new-tokens", type=int, default=32768)
-    parser.add_argument("--max-attempts", type=int, default=3)
     parser.add_argument("--sortish-window-size", type=int, default=2000)
     parser.add_argument("--sortish-seed", type=int, default=42)
     parser.add_argument("--token-budget", type=int, default=None)

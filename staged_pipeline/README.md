@@ -75,8 +75,7 @@ Priority sentences:
 - S0: ...
 ```
 
-程序拒绝空文本或明显偏离纯文本模板的输出；失败样本会保留 `context_id` 并立即写入 `failed.jsonl`，不执行自动重试。
-主批量生成按 sortish batching 显示实际 batch 进度；写入进度按 context 只统计一次。
+程序拒绝空文本或明显偏离纯文本模板的输出，不执行自动重试。每个 batch 解码后，成功样本会立即同步写入 `processed_candidates.jsonl`；失败样本会将 `context_id` 和原始模型输出立即同步写入 `failed.jsonl`。因此任务中断后可以从已落盘的成功样本继续。主批量生成按 sortish batching 显示实际 batch 进度。
 
 ## 1. Atomic fact 抽取
 
@@ -88,11 +87,13 @@ conda run -n shine python qa_gen/staged_pipeline/extract_facts.py \
   --model /path/to/model
 ```
 
-唯一输出 `facts.jsonl`：
+主输出为 `facts.jsonl`：
 
 ```json
 {"context_id": "ctx-001", "facts": [{"fact_id": "F1", "text": "...", "evidence": "...", "importance": 0.8}]}
 ```
+
+每个 batch 解码后，合法结果会立即同步追加到 `facts.jsonl`。该阶段不自动重试；不合法的结果会立即追加到 `failed.jsonl`，其中只包含 `context_id` 和原始模型输出。已有成功 `context_id` 会在再次运行时跳过；失败记录不作为完成状态，因此下次运行会重新生成。`failed.jsonl` 是追加式失败历史日志。
 
 ## 2. Multi-turn QA 生成
 
@@ -104,11 +105,13 @@ conda run -n shine python qa_gen/staged_pipeline/generate_qa.py \
   --model /path/to/model
 ```
 
-唯一输出 `qa.jsonl`。它不保存 context 或 facts，只保存 QA 和 evidence：
+主输出为 `qa.jsonl`。它不保存 context 或 facts，只保存 QA 和 evidence：
 
 ```json
 {"context_id": "ctx-001", "qa": {"dialogue_plan": [], "conversation": [{"turn_id": "T1", "question": "...", "answer": "..."}]}, "evidence": [{"turn_id": "T1", "spans": ["原文片段"]}]}
 ```
+
+每个 batch 解码后，合法结果会立即同步追加到 `qa.jsonl`。该阶段不自动重试；格式不合法的结果会立即追加到 `failed.jsonl`，其中只包含 `context_id` 和原始模型输出。已有成功 `context_id` 会在再次运行时跳过；失败记录不作为完成状态，因此下次运行会重新生成。`failed.jsonl` 是追加式失败历史日志。
 
 ## 3. QA 校验
 
