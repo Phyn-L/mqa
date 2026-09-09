@@ -138,10 +138,18 @@ def run(args: argparse.Namespace) -> Path:
             # Sortish batching may generate contexts out of input order. The
             # callback writes each result as soon as its batch finishes, while
             # context_id keeps the JSONL order-independent and resumable.
+
+            sampling_args = {
+                "do_sample": args.do_sample,
+                "temperature": args.temperature,
+                "top_p":args.top_p,
+                "top_k":args.top_k
+            }
             runner.generate(
                 prompts,
                 args.batch_size,
                 args.max_new_tokens,
+                *sampling_args,
                 sortish_window_size=args.sortish_window_size,
                 sortish_seed=args.sortish_seed,
                 token_budget=args.token_budget,
@@ -174,6 +182,12 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument("--prompt", type=Path, default=DEFAULT_PROMPT)
     parser.add_argument("--model", default="Qwen/Qwen3.5-9B")
+    # do-sample enables args for llm sampling 
+    parser.add_argument("--do-sample", type=bool, default=False)
+    parser.add_argument("--temperature", type=float, default=0.1)
+    parser.add_argument("--top_p", type=float, default=0.9)
+    parser.add_argument("--top_k", type=int, default=3)
+    
     parser.add_argument("--max-samples", type=int, default=None)
     parser.add_argument("--batch-size", type=int, default=64)
     parser.add_argument("--max-new-tokens", type=int, default=8192)

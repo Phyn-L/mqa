@@ -1,4 +1,5 @@
 """Shared JSONL and model-inference utilities for all stages."""
+
 from __future__ import annotations
 
 import json
@@ -24,12 +25,7 @@ class IncrementalJsonlWriter:
         self.output.parent.mkdir(parents=True, exist_ok=True)
         self.failed_output.parent.mkdir(parents=True, exist_ok=True)
         self._handle = self.output.open("a", encoding="utf-8")
-        try:
-            self._failed_handle = self.failed_output.open("a", encoding="utf-8")
-        except BaseException:
-            self._handle.close()
-            self._handle = None
-            raise
+        self._failed_handle = self.failed_output.open("a", encoding="utf-8")
         return self
 
     def __exit__(self, *exc_info: object) -> None:
@@ -71,7 +67,9 @@ def read_jsonl(path: Path, max_samples: int | None = None) -> list[dict[str, Any
             try:
                 record = json.loads(line)
             except json.JSONDecodeError as exc:
-                raise ValueError(f"Invalid JSON at {path}:{line_number}: {exc}") from exc
+                raise ValueError(
+                    f"Invalid JSON at {path}:{line_number}: {exc}"
+                ) from exc
             if not isinstance(record, dict):
                 raise ValueError(f"Record at {path}:{line_number} must be an object")
             records.append(record)
@@ -164,7 +162,6 @@ class ModelRunner:
     def __init__(self, model_name: str, device_map: str, torch_dtype: str) -> None:
         import torch
         from transformers import AutoModelForMultimodalLM, AutoProcessor
-
         self.torch = torch
         self.processor = AutoProcessor.from_pretrained(model_name)
         tokenizer = getattr(self.processor, "tokenizer", self.processor)
@@ -181,8 +178,10 @@ class ModelRunner:
         prompts: list[str],
         batch_size: int,
         max_new_tokens: int,
-        *,
-        sample: bool = False,
+        do_sample: bool = False,
+        temperature = 0.1,
+        top_p = 0.9,
+        top_k = 3,
         sortish_window_size: int = 2000,
         sortish_seed: int = 42,
         token_budget: int | None = None,
@@ -195,14 +194,20 @@ class ModelRunner:
 
         messages = [[{"role": "user", "content": prompt}] for prompt in prompts]
         tokenized = self.processor.apply_chat_template(
-            messages, tokenize=True, add_generation_prompt=True,
+            messages,
+            tokenize=True,
+            add_generation_prompt=True,
             enable_thinking=False,
         )
         input_ids = tokenized["input_ids"] if isinstance(tokenized, dict) else tokenized
         lengths = [len(ids) for ids in input_ids]
         batches = sortish_batches(
-            lengths, batch_size, sortish_window_size, sortish_seed,
-            token_budget, max_new_tokens,
+            lengths,
+            batch_size,
+            sortish_window_size,
+            sortish_seed,
+            token_budget,
+            max_new_tokens,
         )
 
         batch_iterator: Iterable[list[int]] = batches
@@ -211,32 +216,40 @@ class ModelRunner:
             batch_iterator = tqdm(
                 batches, total=len(batches), desc=progress_desc, unit="batch"
             )
-  
 
         outputs: list[str | None] = [None] * len(prompts)
         for batch_indices in batch_iterator:
             batch = [prompts[index] for index in batch_indices]
             messages = [[{"role": "user", "content": prompt}] for prompt in batch]
             inputs = self.processor.apply_chat_template(
-                messages, tokenize=True, add_generation_prompt=True,
-                enable_thinking=False, return_dict=True, return_tensors="pt",
+                messages,
+                tokenize=True,
+                add_generation_prompt=True,
+                enable_thinking=False,
+                return_dict=True,
+                return_tensors="pt",
                 processor_kwargs={"padding": True},
             )
             inputs = {
-                key: value.to(self.device)
-                if isinstance(value, self.torch.Tensor) else value
+                key: (
+                    value.to(self.device)
+                    if isinstance(value, self.torch.Tensor)
+                    else value
+                )
                 for key, value in inputs.items()
             }
             generation_args: dict[str, Any] = {
-                "max_new_tokens": max_new_tokens, "do_sample": sample
+                "max_new_tokens": max_new_tokens,
+                "do_sample": do_sample,
             }
-            if sample:
-                generation_args.update(temperature=0.5, top_p=0.9)
+            if do_sample:
+                generation_args.update(temperature=temperature, top_p=top_p, top_k=top_k)
             with self.torch.inference_mode():
                 generated = self.model.generate(**inputs, **generation_args)
             input_width = inputs["input_ids"].shape[-1]
             decoded = self.processor.batch_decode(
-                generated[:, input_width:], skip_special_tokens=True,
+                generated[:, input_width:],
+                skip_special_tokens=True,
                 clean_up_tokenization_spaces=False,
             )
             for index, text in zip(batch_indices, decoded):
