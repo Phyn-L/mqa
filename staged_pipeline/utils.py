@@ -162,6 +162,7 @@ class ModelRunner:
     def __init__(self, model_name: str, device_map: str, torch_dtype: str) -> None:
         import torch
         from transformers import AutoModelForMultimodalLM, AutoProcessor
+
         self.torch = torch
         self.processor = AutoProcessor.from_pretrained(model_name)
         tokenizer = getattr(self.processor, "tokenizer", self.processor)
@@ -178,10 +179,11 @@ class ModelRunner:
         prompts: list[str],
         batch_size: int,
         max_new_tokens: int,
+        *,
         do_sample: bool = False,
-        temperature = 0.1,
-        top_p = 0.9,
-        top_k = 3,
+        temperature: float = 0.1,
+        top_p: float = 0.9,
+        top_k: int = 3,
         sortish_window_size: int = 2000,
         sortish_seed: int = 42,
         token_budget: int | None = None,
@@ -213,6 +215,7 @@ class ModelRunner:
         batch_iterator: Iterable[list[int]] = batches
         if progress_desc is not None:
             from tqdm.auto import tqdm
+
             batch_iterator = tqdm(
                 batches, total=len(batches), desc=progress_desc, unit="batch"
             )
@@ -243,7 +246,9 @@ class ModelRunner:
                 "do_sample": do_sample,
             }
             if do_sample:
-                generation_args.update(temperature=temperature, top_p=top_p, top_k=top_k)
+                generation_args.update(
+                    temperature=temperature, top_p=top_p, top_k=top_k
+                )
             with self.torch.inference_mode():
                 generated = self.model.generate(**inputs, **generation_args)
             input_width = inputs["input_ids"].shape[-1]

@@ -148,7 +148,7 @@ def audit_with_regeneration(
         )
         repair_item = PromptItem(0, record, repair_prompt, 0)
         raw_candidate = generate_batches(
-            model, processor, device, [[repair_item]], max_new_tokens, sample=True
+            model, processor, device, [[repair_item]], max_new_tokens, do_sample=True
         )[0]
         parsed, parse_error = parse_json_object(raw_candidate)
         if parse_error or parsed is None:

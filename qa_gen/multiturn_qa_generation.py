@@ -64,7 +64,7 @@ def build_prompt_items(records: Sequence[dict[str, Any]], template: str, process
     return [PromptItem(i, record, prompts[i], len(ids[i])) for i, record in enumerate(records)]
 
 
-def generate_batches(model: Any, processor: Any, device: torch.device, batches: Sequence[Sequence[PromptItem]], max_new_tokens: int, sample: bool = False) -> dict[int, str]:
+def generate_batches(model: Any, processor: Any, device: torch.device, batches: Sequence[Sequence[PromptItem]], max_new_tokens: int, do_sample: bool = False) -> dict[int, str]:
     """Generate one output per prompt batch; no parsing or file I/O occurs here."""
     outputs: dict[int, str] = {}
     for batch in tqdm(batches, desc="QA generation", unit="batch"):
@@ -75,7 +75,7 @@ def generate_batches(model: Any, processor: Any, device: torch.device, batches: 
         )
         inputs = {k: v.to(device) if isinstance(v, torch.Tensor) else v for k, v in inputs.items()}
         with torch.inference_mode():
-            generated = model.generate(**inputs, max_new_tokens=max_new_tokens, do_sample=sample, **({"temperature": 0.6, "top_p": 0.9} if sample else {}))
+            generated = model.generate(**inputs, max_new_tokens=max_new_tokens, do_sample=do_sample, **({"temperature": 0.6, "top_p": 0.9} if do_sample else {}))
         texts = decode_generated_tokens(generated, inputs, processor)
         outputs.update({item.index: text.strip() for item, text in zip(batch, texts)})
     return outputs
